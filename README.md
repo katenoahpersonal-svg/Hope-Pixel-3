@@ -1,86 +1,122 @@
-# Hope Atlas — Kate Noah · Hope in Print
+# The Infinite Atelier
 
-A portfolio charted like a night sky. Six worlds of work sit in a constellation
-of glass cards; **everything is clickable and everything opens into a card.**
-No 3D engine, no guide character, no scroll-jacking — the wonder comes from
-light, depth and typography instead.
+An immersive, accessible dimensional portfolio prototype for Kate Noah / Hope in Print.
 
-Built from Kate's real 2026 resume: ecommerce & digital experience, UI/UX,
-integrated campaigns, print production, interactive and product work.
+This build turns the portfolio into one continuous architectural world while keeping the experience readable, keyboard-accessible, mobile-friendly, and compatible with normal browser scrolling.
 
-## Run it
+## What is included
+
+- A custom generative dimensional canvas environment with chapter-specific architecture
+- The Threshold hero
+- Six unique project territories
+- Full editorial case-study overlays
+- Browser Back and Forward support for `/work/project-slug` routes
+- Direct project index
+- Filterable archive
+- Interactive About artifacts
+- Expandable capability library
+- Interactive six-stage process
+- Accessible contact form and in-world success state
+- Optional atmospheric sound, off by default
+- Motion toggle and `prefers-reduced-motion` support
+- Desktop custom cursor with contextual labels
+- Purpose-built mobile layout
+- Static visual fallback when canvas is unavailable
+- No external libraries, fonts, image requests, or build dependencies
+
+## Run locally
+
+1. Install Node.js 18 or newer.
+2. Open a terminal in this folder.
+3. Run:
 
 ```bash
-powershell -NoProfile -ExecutionPolicy Bypass -File serve.ps1
+npm start
 ```
 
-Then open http://localhost:8394/. It's a static site — no build step, no npm
-install, no dependencies. Only Google Fonts is fetched from the network.
+4. Open:
 
-## Deploy
-
-Push this folder to GitHub Pages (Settings → Pages → deploy from branch, root).
-`index.html` at the root is all Pages needs. `serve.ps1` and `_snaps/` are
-local dev helpers and can be deleted before publishing.
-
-## Structure
-
-```
-index.html    the whole interface + THE ARCHIVE (all copy lives here) ← edit copy
-css/main.css  design system: sky, glass cards, dialogs, form, reading mode
-js/app.js     one module: starfield, tilt, router, dialogs, form, audio
-serve.ps1     local dev server (port 8394)
+```text
+http://localhost:4173
 ```
 
-## How the content works
+The local Node server includes a History API fallback, so direct case-study URLs such as `/work/matuska` work correctly.
 
-`index.html` → `<section class="doc" id="docArchive">` is the **single source of
-truth** for every word on the site. It holds the six full case studies plus
-About, Capabilities and Process.
+You may also open `index.html` directly. In direct-file mode, the project automatically uses hash routes such as `#/work/matuska` because a browser cannot provide server-side URL fallback from a local file.
 
-* The card dialogs **clone their content from it** at open time.
-* "Read as one page" reveals it as one calm, styled document (`?lite=1`).
-* `<noscript>` unhides it, so the portfolio is readable with JS disabled.
-* Screen readers and search engines get the real text either way.
+## Edit portfolio content
 
-To change copy, edit the archive. To change a world's color or card art, edit
-its `--accent` in the card markup and its `.art-*` rule in the CSS.
+All portfolio content is stored in `data.js`:
 
-## Everything clickable
+- `projects`
+- project case-study sections
+- results and impact
+- studio artifacts
+- capabilities and tools
+- process stages
 
-| Click | Opens |
-|---|---|
-| Any of the six world cards | Full case study card (challenge → strategy → process → tools → solution → impact) |
-| About / Capabilities / Process cards *or* nav links | The matching card dialog |
-| Card arrows, or ← / → keys | Previous / next world, in place |
-| "All work", ✕, Escape, or the scrim | Closes back to the atlas |
-| Contact form | Composes a prefilled email + shows a confirmation |
+The scene logic is kept separate in `app.js`, so project copy can be changed without editing the dimensional environment.
 
-Overlays are **hash-routed** (`#w/matuska`, `#about`, `#capabilities`,
-`#process`), so deep links work and the browser Back button behaves: Back steps
-card by card, while ✕ / Escape unwind to the page in one action. Each history
-entry stores its own depth in `history.state`, so the unwind stays correct even
-after the visitor presses Back themselves.
+## Contact form
 
-## The five dimensions, without the engine
+The included form provides complete client-side validation and a polished confirmation state. It intentionally does not transmit personal data until a form service is selected.
 
-1. **Space** — layered depth: parallax starfield, drifting nebulae, tilting
-   cards with cursor-tracked glare, staggered constellation grid.
-2. **Time** — the palette shifts with the visitor's local hour (dawn / day /
-   dusk / night). Test with `?phase=dusk`.
-3. **Interaction** — card tilt, magnetic chrome, trailing cursor, reveal-on-
-   scroll, hover glare. Every motion is tied to something clickable.
-4. **Sound** — the nav toggle starts a WebAudio ambient pad, synthesized live
-   (no audio files, never autoplaying).
-5. **Personalization** — reduced-motion support, touch tiers, and a one-page
-   reading mode that persists across visits.
+To connect it, replace the success branch inside `setupContactForm()` in `app.js` with one of the following:
 
-## Accessibility
+- Netlify Forms
+- Formspree
+- Basin
+- a serverless function
+- a custom API endpoint
 
-* Real `<button>` / `<a>` elements throughout; visible focus rings.
-* Focus is trapped in dialogs and returned to the trigger on close; Escape closes.
-* `prefers-reduced-motion`: no starfield animation, comets, drift, tilt or reveals.
-* Card art is decorative (`aria-hidden`); all meaning is in text.
-* One-page reading mode and `<noscript>` both expose the complete portfolio.
-* Mobile (< 900px): cards stack full width, nav collapses into a menu sheet,
-  no horizontal scroll at 375px.
+## Deployment
+
+### Vercel
+
+1. Upload the folder to a Git repository.
+2. Import the repository into Vercel.
+3. Use the default static deployment settings.
+4. `vercel.json` already includes the route fallback.
+
+### Netlify
+
+1. Drag the folder into Netlify Drop or connect the repository.
+2. Set the publish directory to `.`.
+3. `netlify.toml` already includes the route fallback.
+
+### GitHub Pages
+
+GitHub Pages does not provide native History API fallback for arbitrary paths. The easiest option is to deploy with hash routing:
+
+1. In `app.js`, set `const isFile = true;` or replace the routing helper with hash-only routing.
+2. Push the folder to a repository.
+3. Enable Pages from the repository root.
+
+For clean `/work/...` URLs, use Vercel or Netlify.
+
+## Accessibility notes
+
+- Semantic headings and section landmarks
+- Skip link
+- Minimum 44px interaction targets
+- Keyboard-operable project cards, filters, artifacts, capability drawers, process stages, dialogs, and form
+- Native modal dialogs with Escape behavior
+- Visible focus states
+- Reduced-motion behavior
+- Screen-reader status announcements
+- No essential information is stored only in the canvas
+- Sound is optional and disabled by default
+
+## Performance notes
+
+The world uses a lightweight Canvas 2D projection system rather than heavy external 3D dependencies. It automatically lowers detail on smaller or lower-core devices, caps pixel density, pauses when the tab is hidden, and keeps the HTML content independent from scene rendering.
+
+## Files
+
+- `index.html` — semantic application shell
+- `styles.css` — full visual system and responsive behavior
+- `data.js` — editable structured content
+- `app.js` — interactions, routing, accessibility, sound, and dimensional environment
+- `server.js` — zero-dependency local server with route fallback
+- `vercel.json` — Vercel routing
+- `netlify.toml` — Netlify routing
