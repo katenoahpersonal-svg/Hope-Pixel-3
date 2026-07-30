@@ -1,181 +1,687 @@
 <!doctype html>
-<html lang="en" data-time="night">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="theme-color" content="#05040b" />
-  <meta name="description" content="Kate is a multidisciplinary designer working across web, graphic, print, and film. Enter the Hope in Print universe." />
-  <title>Kate — Hope in Print</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="./styles.css" />
-  <script type="importmap">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Kate Noah — Hope in Print · A Portfolio Atlas</title>
+  <meta name="description" content="Katelynn 'Kate' Noah is a multidisciplinary creative — ecommerce &amp; digital experience, UI/UX, branding, print, motion and integrated marketing. Six worlds of work, charted as a clickable atlas of cards.">
+  <meta name="theme-color" content="#05060c">
+  <meta name="color-scheme" content="dark">
+  <meta property="og:title" content="Kate Noah — Hope in Print · A Portfolio Atlas">
+  <meta property="og:description" content="A portfolio charted like a night sky: six worlds of design, commerce and campaigns — every star clickable, every story a card.">
+  <meta property="og:type" content="website">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%236ee7ff'/%3E%3Cstop offset='.55' stop-color='%238b7bff'/%3E%3Cstop offset='1' stop-color='%23ff7ac3'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath fill='url(%23g)' d='M32 3l6.2 20.3L59 29l-20.8 5.7L32 55l-6.2-20.3L5 29l20.8-5.7z'/%3E%3Ccircle cx='32' cy='29' r='3.4' fill='%23f0f2ff'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/main.css">
+  <script type="application/ld+json">
   {
-    "imports": {
-      "three": "https://cdn.jsdelivr.net/npm/three@0.185.1/build/three.module.js",
-      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.185.1/examples/jsm/",
-      "gsap": "https://cdn.jsdelivr.net/npm/gsap@3.15.0/index.js",
-      "gsap/ScrollTrigger": "https://cdn.jsdelivr.net/npm/gsap@3.15.0/ScrollTrigger.js",
-      "lenis": "https://cdn.jsdelivr.net/npm/lenis@1.3.25/+esm"
-    }
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "name": "Katelynn Noah",
+    "alternateName": "Kate Noah",
+    "jobTitle": "Ecommerce & Digital Experience Manager · UI/UX Designer · Integrated Marketing",
+    "email": "mailto:katenoah.personal@gmail.com",
+    "url": "https://hopeinprint.com",
+    "sameAs": ["https://www.linkedin.com/in/katelynnnoah"],
+    "worksFor": { "@type": "Organization", "name": "Hope in Print" },
+    "alumniOf": { "@type": "CollegeOrUniversity", "name": "Minnesota State University" },
+    "knowsAbout": ["Ecommerce", "UI/UX Design", "BigCommerce", "Shopify", "Branding", "Print Production", "Email Marketing", "Meta Ads", "AdRoll", "Video Editing", "Creative Direction"]
   }
   </script>
 </head>
-<body>
-  <a class="skip-link" href="#main">Skip to portfolio content</a>
+<body data-phase="night">
+  <a class="skip-link" href="#atlas">Skip to the work</a>
 
-  <div id="loader" class="loader" aria-live="polite">
-    <div class="loader__mark" aria-hidden="true">
-      <span></span><span></span><span></span><span></span><span></span>
-    </div>
-    <p class="loader__eyebrow">assembling hope</p>
-    <div class="loader__count"><span id="loaderCount">0</span><sup>%</sup></div>
-    <div class="loader__line"><i id="loaderBar"></i></div>
-  </div>
+  <!-- living night sky (decorative) -->
+  <canvas id="sky" aria-hidden="true"></canvas>
+  <div class="nebula" aria-hidden="true"><i></i><i></i><i></i></div>
 
-  <canvas id="universe" aria-hidden="true"></canvas>
-  <div class="noise" aria-hidden="true"></div>
-  <div id="cursor" class="cursor" aria-hidden="true"><i></i></div>
-  <div id="cursorTrail" class="cursor-trail" aria-hidden="true"></div>
-
-  <header class="site-header">
-    <a class="brand magnetic" href="#hero" aria-label="Hope in Print, back to beginning">
-      <span class="brand__butterfly" aria-hidden="true">✦</span>
-      <span>HOPE IN PRINT</span>
+  <!-- ══ Nav ══ -->
+  <header class="nav">
+    <a class="brand magnetic" href="#top" data-scroll="top" aria-label="Hope in Print — back to the top">
+      <svg class="brand-mark" viewBox="0 0 64 64" aria-hidden="true">
+        <defs><linearGradient id="bm" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#6ee7ff"/><stop offset=".55" stop-color="#8b7bff"/><stop offset="1" stop-color="#ff7ac3"/>
+        </linearGradient></defs>
+        <path fill="url(#bm)" d="M32 3l6.2 20.3L59 29l-20.8 5.7L32 55l-6.2-20.3L5 29l20.8-5.7z"/>
+        <circle cx="32" cy="29" r="3.4" fill="#f0f2ff"/>
+      </svg>
+      <span class="brand-word">Hope&nbsp;in&nbsp;Print<em>Kate Noah</em></span>
     </a>
-    <div class="site-header__right">
-      <button id="soundToggle" class="sound-toggle magnetic" type="button" aria-pressed="false">
-        <span class="sound-toggle__bars" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
-        <span class="sound-toggle__label">Sound off</span>
+    <nav class="nav-links" aria-label="Site">
+      <button class="nav-link magnetic" data-scroll="atlas"><span data-txt="Work">Work</span></button>
+      <button class="nav-link magnetic" data-dialog="about"><span data-txt="About">About</span></button>
+      <button class="nav-link magnetic" data-dialog="capabilities"><span data-txt="Capabilities">Capabilities</span></button>
+      <button class="nav-link magnetic" data-dialog="process"><span data-txt="Process">Process</span></button>
+      <button class="nav-link magnetic" data-scroll="contact"><span data-txt="Contact">Contact</span></button>
+      <button class="sound-toggle magnetic" id="soundToggle" aria-pressed="false" aria-label="Toggle ambient sound">
+        <span class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
       </button>
-      <button id="menuToggle" class="menu-toggle magnetic" type="button" aria-expanded="false" aria-controls="menuPanel">
-        <span>Menu</span><i></i>
+      <button class="menu-toggle magnetic" id="menuToggle" aria-expanded="false" aria-label="Open menu">
+        <span></span><span></span>
       </button>
-    </div>
+    </nav>
   </header>
 
-  <nav id="menuPanel" class="menu-panel" aria-label="Primary navigation">
-    <p>Travel to</p>
-    <a href="#hero"><span>01</span>Origin</a>
-    <a href="#works"><span>02</span>Selected worlds</a>
-    <a href="#about"><span>03</span>Orbit</a>
-    <a href="#contact"><span>04</span>Signal</a>
-  </nav>
-
-  <aside class="journey-ui" aria-hidden="true">
-    <div class="journey-ui__index"><span id="chapterIndex">01</span><i></i><span>04</span></div>
-    <p id="chapterLabel">ORIGIN</p>
-  </aside>
-
-  <div class="scroll-hint" aria-hidden="true">
-    <span>Scroll to travel</span>
-    <i></i>
+  <!-- ══ Mobile / full menu ══ -->
+  <div class="menu-overlay" id="menuOverlay" role="dialog" aria-modal="true" aria-label="Menu" hidden>
+    <div class="menu-inner">
+      <p class="eyebrow">Chart a course</p>
+      <nav class="menu-links" aria-label="Menu">
+        <button class="menu-link" data-scroll="top">Top <em>the beginning</em></button>
+        <button class="menu-link" data-scroll="atlas">Work <em>six worlds, one sky</em></button>
+        <button class="menu-link" data-dialog="about">About <em>the maker</em></button>
+        <button class="menu-link" data-dialog="capabilities">Capabilities <em>what Kate does</em></button>
+        <button class="menu-link" data-dialog="process">Process <em>how it gets made</em></button>
+        <button class="menu-link" data-scroll="contact">Contact <em>send a signal</em></button>
+      </nav>
+      <button class="menu-lite" data-action="lite">Read everything as one page</button>
+      <button class="menu-close" data-menu-close aria-label="Close menu">✕</button>
+    </div>
   </div>
 
-  <main id="main">
-    <section id="hero" class="chapter chapter--hero" data-chapter="Origin">
-      <div class="hero-copy">
-        <p class="eyebrow reveal">MULTIDISCIPLINARY DESIGNER · FILMMAKER · WORLD BUILDER</p>
-        <h1 aria-label="Kate">
-          <span class="hero-letter">K</span><span class="hero-letter">A</span><span class="hero-letter">T</span><span class="hero-letter">E</span>
-        </h1>
-        <div class="hero-copy__bottom reveal">
-          <p>I build visual worlds where strategy, emotion, and a little bit of impossible become tangible.</p>
-          <span>Santa Monica ↔ Okoboji</span>
+  <main id="top">
+    <!-- ══ Hero ══ -->
+    <section class="hero" aria-label="Introduction">
+      <p class="hero-eyebrow reveal"><span>Kate creates between dimensions</span><span class="rule"></span><span>Hope&nbsp;in&nbsp;Print</span></p>
+      <h1 class="hero-title"><span class="ht-line">KATE</span><span class="ht-line ht-grad">NOAH</span></h1>
+      <p class="hero-sub reveal">Multidisciplinary design, digital experiences, print, motion and visual storytelling — built with imagination, grounded in purpose.</p>
+      <div class="hero-cta reveal">
+        <button class="cta-main magnetic" data-scroll="atlas">Explore the atlas</button>
+        <button class="cta-ghost magnetic" data-action="lite">Read as one page</button>
+      </div>
+      <p class="hero-hint reveal" aria-hidden="true">Every star opens. Click anything.</p>
+    </section>
+
+    <!-- ══ The Atlas: six clickable worlds ══ -->
+    <section class="atlas" id="atlas" aria-label="Selected work">
+      <header class="sec-head reveal">
+        <p class="eyebrow">Selected work</p>
+        <h2>Six worlds,<br>one sky.</h2>
+      </header>
+      <div class="atlas-grid">
+        <article class="world-card reveal" style="--accent:#8b7bff; --tilt:-1.2deg">
+          <button class="wc-hit" data-case="hip" aria-label="Open case study: Hope in Print">
+            <span class="wc-art art-hip" aria-hidden="true"></span>
+            <span class="wc-body">
+              <span class="wc-eyebrow"><b>01</b> Identity · Studio <i>2023 — now</i></span>
+              <span class="wc-title">Hope in Print</span>
+              <span class="wc-tag">A studio built on the belief that hope is printable.</span>
+              <span class="wc-open">Open the story <i>↗</i></span>
+            </span>
+          </button>
+        </article>
+        <article class="world-card reveal" style="--accent:#6ee7ff; --tilt:0.9deg">
+          <button class="wc-hit" data-case="matuska" aria-label="Open case study: Matuska">
+            <span class="wc-art art-matuska" aria-hidden="true"></span>
+            <span class="wc-body">
+              <span class="wc-eyebrow"><b>02</b> Ecommerce · Web <i>2022 — now</i></span>
+              <span class="wc-title">Matuska</span>
+              <span class="wc-tag">A multimillion-dollar storefront, rebuilt for clarity.</span>
+              <span class="wc-open">Open the story <i>↗</i></span>
+            </span>
+          </button>
+        </article>
+        <article class="world-card reveal" style="--accent:#ff7ac3; --tilt:-0.8deg">
+          <button class="wc-hit" data-case="signal" aria-label="Open case study: The Signal Season">
+            <span class="wc-art art-signal" aria-hidden="true"></span>
+            <span class="wc-body">
+              <span class="wc-eyebrow"><b>03</b> Marketing · Campaigns <i>2022 — now</i></span>
+              <span class="wc-title">The Signal Season</span>
+              <span class="wc-tag">Integrated campaigns that travel every channel.</span>
+              <span class="wc-open">Open the story <i>↗</i></span>
+            </span>
+          </button>
+        </article>
+        <article class="world-card reveal" style="--accent:#ffd66b; --tilt:1.1deg">
+          <button class="wc-hit" data-case="print" aria-label="Open case study: The Paper Field">
+            <span class="wc-art art-print" aria-hidden="true"></span>
+            <span class="wc-body">
+              <span class="wc-eyebrow"><b>04</b> Print · Editorial <i>2022 — now</i></span>
+              <span class="wc-title">The Paper Field</span>
+              <span class="wc-tag">Catalogs, magazine ads and print that sells.</span>
+              <span class="wc-open">Open the story <i>↗</i></span>
+            </span>
+          </button>
+        </article>
+        <article class="world-card reveal" style="--accent:#b8c7ff; --tilt:-1.4deg">
+          <button class="wc-hit" data-case="pixel" aria-label="Open case study: Hope Pixel">
+            <span class="wc-art art-pixel" aria-hidden="true"></span>
+            <span class="wc-body">
+              <span class="wc-eyebrow"><b>05</b> Interactive · 3D web <i>2025</i></span>
+              <span class="wc-title">Hope Pixel</span>
+              <span class="wc-tag">A two-room dream gallery in a single file.</span>
+              <span class="wc-open">Open the story <i>↗</i></span>
+            </span>
+          </button>
+        </article>
+        <article class="world-card reveal" style="--accent:#7de8b1; --tilt:0.7deg">
+          <button class="wc-hit" data-case="clover" aria-label="Open case study: Clover">
+            <span class="wc-art art-clover" aria-hidden="true"></span>
+            <span class="wc-body">
+              <span class="wc-eyebrow"><b>06</b> Product · Motion <i>2026</i></span>
+              <span class="wc-title">Clover</span>
+              <span class="wc-tag">An organic social garden, designed for humans.</span>
+              <span class="wc-open">Open the story <i>↗</i></span>
+            </span>
+          </button>
+        </article>
+      </div>
+      <p class="atlas-also reveal">Also in orbit: <strong>Vanishing Hour</strong>, a candlelit theatre of underreported missing-person cases · <strong>KTLN On-Air</strong>, the portfolio as a broadcast station. Ask about either.</p>
+    </section>
+
+    <!-- ══ The Maker: about / capabilities / process — all clickable ══ -->
+    <section class="studio" aria-label="About the maker">
+      <header class="sec-head reveal">
+        <p class="eyebrow">The maker</p>
+        <h2>Design is how<br>hope travels.</h2>
+      </header>
+      <div class="studio-grid">
+        <article class="studio-card reveal" style="--accent:#8b7bff">
+          <button class="wc-hit" data-dialog="about" aria-label="Open: about Kate">
+            <span class="sc-kicker">About</span>
+            <span class="sc-body">Katelynn “Kate” Noah — ecommerce &amp; digital experience manager, UI/UX designer and integrated marketer. By day she runs end-to-end digital operations for a multimillion-dollar storefront; through Hope&nbsp;in&nbsp;Print she builds brands, sites and stories for people doing quiet, good work.</span>
+            <span class="wc-open">The full story <i>↗</i></span>
+          </button>
+        </article>
+        <article class="studio-card reveal" style="--accent:#6ee7ff">
+          <button class="wc-hit" data-dialog="capabilities" aria-label="Open: capabilities">
+            <span class="sc-kicker">Capabilities</span>
+            <span class="sc-chips" aria-hidden="true"><i>BigCommerce</i><i>UI / UX</i><i>Meta Ads</i><i>InDesign</i><i>Email</i><i>Premiere</i><i>+ 40 more</i></span>
+            <span class="wc-open">Everything she works in <i>↗</i></span>
+          </button>
+        </article>
+        <article class="studio-card reveal" style="--accent:#ff7ac3">
+          <button class="wc-hit" data-dialog="process" aria-label="Open: process">
+            <span class="sc-kicker">Process</span>
+            <span class="sc-steps" aria-hidden="true"><i>01 Discover</i><i>02 Define</i><i>03 Design</i><i>04 Build</i><i>05 Launch</i><i>06 Grow</i></span>
+            <span class="wc-open">How it gets made <i>↗</i></span>
+          </button>
+        </article>
+      </div>
+      <dl class="stats reveal">
+        <div><dt>Years</dt><dd>04+</dd></div>
+        <div><dt>Disciplines</dt><dd>08</dd></div>
+        <div><dt>Worlds</dt><dd>06</dd></div>
+        <div><dt>Degree</dt><dd>B.S. Marketing</dd></div>
+      </dl>
+    </section>
+
+    <!-- ══ Contact ══ -->
+    <section class="contact" id="contact" aria-label="Contact">
+      <div class="contact-card reveal">
+        <p class="eyebrow">Touchdown</p>
+        <h2>Let’s create something<br>that doesn’t exist yet.</h2>
+        <div class="contact-links">
+          <a class="contact-mail magnetic" href="mailto:katenoah.personal@gmail.com">katenoah.personal@gmail.com<span class="mail-line"></span></a>
+          <p class="contact-socials">
+            <a href="https://www.linkedin.com/in/katelynnnoah" rel="me noopener" target="_blank">LinkedIn</a>
+            <span aria-hidden="true">·</span>
+            <a href="https://hopeinprint.com" rel="me noopener" target="_blank">hopeinprint.com</a>
+          </p>
         </div>
+        <div class="contact-form-mount" data-form-mount></div>
       </div>
     </section>
 
-    <section id="works" class="chapter chapter--works" data-chapter="Selected worlds">
-      <div class="section-intro">
-        <p class="eyebrow">02 · SELECTED WORKS</p>
-        <h2>Every project<br />has its own gravity.</h2>
-      </div>
-
-      <article class="project-card" data-project="0" tabindex="0" role="button" aria-label="Open Hope Pixel case study">
-        <div><span>01</span><span>WEB · IMMERSIVE</span></div>
-        <h3>Hope Pixel</h3>
-        <p>A living digital atelier built as architecture, not pages.</p>
-        <b>2026</b>
-      </article>
-
-      <article class="project-card" data-project="1" tabindex="0" role="button" aria-label="Open Walking With God case study">
-        <div><span>02</span><span>FILM · DIRECTION</span></div>
-        <h3>Walking With God</h3>
-        <p>A lyrical short-film world about faith, memory, and light.</p>
-        <b>2026</b>
-      </article>
-
-      <article class="project-card" data-project="2" tabindex="0" role="button" aria-label="Open Matuska Digital case study">
-        <div><span>03</span><span>COMMERCE · SYSTEMS</span></div>
-        <h3>Matuska Digital</h3>
-        <p>Turning a deep catalog into an intuitive, high-converting ecosystem.</p>
-        <b>2025—26</b>
-      </article>
-
-      <article class="project-card" data-project="3" tabindex="0" role="button" aria-label="Open Hope in Print case study">
-        <div><span>04</span><span>BRAND · PRINT</span></div>
-        <h3>Hope in Print</h3>
-        <p>Identity, objects, and messages designed to leave light behind.</p>
-        <b>2025</b>
-      </article>
-    </section>
-
-    <section id="about" class="chapter chapter--about" data-chapter="Orbit">
-      <div class="about-copy glass-panel">
-        <p class="eyebrow">03 · THE HUMAN IN THE MACHINE</p>
-        <h2>Part artist.<br />Part systems thinker.<br /><em>Entirely curious.</em></h2>
-        <p>Kate moves between pixels, ink, motion, and story—using technology as a brush, not a boundary. Her work is grounded in feeling, sharpened by strategy, and always searching for the tiny spark that makes people care.</p>
-        <a class="text-link magnetic" href="#contact">More about Kate <span>↗</span></a>
-      </div>
-      <ul class="skill-cloud" aria-label="Skills">
-        <li>Art Direction</li><li>Web Design</li><li>Creative Code</li><li>Brand Systems</li><li>Graphic Design</li><li>Print</li><li>Video</li><li>Post Production</li><li>Story</li><li>Strategy</li>
-      </ul>
-    </section>
-
-    <section id="contact" class="chapter chapter--contact" data-chapter="Signal">
-      <div class="contact-panel glass-panel">
-        <p class="eyebrow">04 · OPEN A PORTAL</p>
-        <h2>Have a world<br />you want to make real?</h2>
-        <a class="contact-email magnetic" href="mailto:hello@hopeinprint.com">hello@hopeinprint.com <span>↗</span></a>
-        <div class="contact-panel__footer">
-          <div><span>Elsewhere</span><a href="#">Instagram</a><a href="#">Vimeo</a><a href="#">LinkedIn</a></div>
-          <p>Available for select collaborations, dimensional websites, visual identities, and stories with a pulse.</p>
-        </div>
-      </div>
-      <p class="closing-mark" aria-hidden="true">HOPE<br />IS A<br />VERB.</p>
-    </section>
+    <footer class="footer">
+      <span class="phase-chip"><i class="phase-dot" aria-hidden="true"></i><span id="phaseText">NIGHT · LOCAL SKY</span></span>
+      <button class="foot-link" data-action="lite">Read as one page</button>
+      <span class="foot-fine">© 2026 Hope in Print · Charted under a living sky</span>
+      <button class="foot-link" data-scroll="top">Back to top ↑</button>
+    </footer>
   </main>
 
-  <dialog id="caseStudy" class="case-study">
-    <button id="closeCaseStudy" class="case-study__close magnetic" type="button" aria-label="Close case study">Close ×</button>
-    <div class="case-study__visual"><canvas id="portalCanvas" aria-hidden="true"></canvas></div>
-    <div class="case-study__copy">
-      <p id="caseMeta" class="eyebrow">WEB · IMMERSIVE · 2026</p>
-      <h2 id="caseTitle">Hope Pixel</h2>
-      <p id="caseDescription">A living digital atelier built as architecture, not pages.</p>
-      <dl>
-        <div><dt>Role</dt><dd id="caseRole">Creative Direction, Design, Development</dd></div>
-        <div><dt>Focus</dt><dd id="caseFocus">World building, interaction, motion</dd></div>
-      </dl>
-      <button class="portal-button magnetic" type="button">View full case study <span>↗</span></button>
+  <!-- ══ Case dialog ══ -->
+  <div class="case-overlay" id="caseOverlay" role="dialog" aria-modal="true" aria-labelledby="caseTitle" hidden>
+    <div class="case-scrim" data-close></div>
+    <article class="case-panel" id="casePanel">
+      <button class="case-close magnetic" data-close aria-label="Close case study">✕</button>
+      <div class="case-inner" id="caseInner"></div>
+    </article>
+  </div>
+
+  <!-- ══ Panel dialog (about · capabilities · process) ══ -->
+  <div class="case-overlay panel-overlay" id="panelOverlay" role="dialog" aria-modal="true" aria-labelledby="panelTitle" hidden>
+    <div class="case-scrim" data-close></div>
+    <article class="case-panel" id="panelPanel">
+      <button class="case-close magnetic" data-close aria-label="Close panel">✕</button>
+      <div class="case-inner" id="panelInner"></div>
+    </article>
+  </div>
+
+  <!-- ══ Custom cursor ══ -->
+  <div class="cursor" id="cursor" aria-hidden="true">
+    <div class="cursor-dot" id="cursorDot"></div>
+    <div class="cursor-ring" id="cursorRing"><span id="cursorTag"></span></div>
+  </div>
+
+  <!-- ══ Contact form (mounted by JS; also into the one-page view) ══ -->
+  <template id="tplContactForm">
+    <form class="contact-form" novalidate>
+      <div class="cf-grid">
+        <label class="cf-field"><span>Name</span>
+          <input name="name" required autocomplete="name" placeholder="Your name">
+        </label>
+        <label class="cf-field"><span>Email</span>
+          <input type="email" name="email" required autocomplete="email" placeholder="you@example.com">
+        </label>
+        <label class="cf-field"><span>Project type</span>
+          <select name="type">
+            <option>Web &amp; ecommerce</option>
+            <option>Branding &amp; identity</option>
+            <option>Print &amp; catalogs</option>
+            <option>Campaigns &amp; email</option>
+            <option>Video &amp; motion</option>
+            <option>Something that doesn’t exist yet</option>
+          </select>
+        </label>
+        <label class="cf-field"><span>Budget range</span>
+          <select name="budget">
+            <option>Under $1k</option>
+            <option>$1k – $5k</option>
+            <option>$5k – $15k</option>
+            <option>$15k+</option>
+            <option selected>Let’s talk</option>
+          </select>
+        </label>
+        <label class="cf-field"><span>Timeline</span>
+          <select name="timeline">
+            <option>As soon as possible</option>
+            <option selected>1 – 3 months</option>
+            <option>3 – 6 months</option>
+            <option>Flexible</option>
+          </select>
+        </label>
+      </div>
+      <label class="cf-field cf-msg"><span>Message</span>
+        <textarea name="message" rows="4" required placeholder="Tell me about the thing you want to exist…"></textarea>
+      </label>
+      <p class="cf-error" role="alert" hidden></p>
+      <div class="cf-actions">
+        <button type="submit" class="cf-send magnetic">Send the signal ↗</button>
+        <a class="cf-direct" href="mailto:katenoah.personal@gmail.com">or email directly</a>
+      </div>
+    </form>
+    <div class="cf-done" hidden tabindex="-1">
+      <p class="cf-done-mark" aria-hidden="true">✦</p>
+      <h3>Your message is ready.</h3>
+      <p>Your email app just opened with everything filled in — press send there and it’s on its way to Kate. If nothing opened, write to
+        <a href="mailto:katenoah.personal@gmail.com">katenoah.personal@gmail.com</a> — same sky, same inbox.</p>
+      <button class="cf-again">Write another message</button>
     </div>
-  </dialog>
+  </template>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       The archive. Full copy for every card on this site.
+       · The dialogs clone their content from here.
+       · "Read as one page" reveals it as a single calm document.
+       · <noscript> unhides it so nothing is ever unreachable.
+       ═══════════════════════════════════════════════════════════════ -->
+  <section class="doc" id="docArchive" hidden aria-label="Full portfolio text">
+    <div class="doc-shell">
+
+      <header class="doc-hero">
+        <p class="doc-eyebrow">Hope in Print · portfolio</p>
+        <p class="doc-h1" role="heading" aria-level="2">Katelynn “Kate” Noah<br><span>creates between dimensions.</span></p>
+        <p class="doc-lede">Multidisciplinary design, digital experiences, print, motion and visual storytelling — built with imagination, grounded in purpose. Ecommerce &amp; digital experience manager, UI/UX designer and integrated marketer with 4+ years leading storefronts, brands and campaigns end to end.</p>
+        <p class="doc-mode-note lite-only">You’re reading the whole portfolio as one calm page.
+          <button class="doc-exit-lite" data-action="unlite">Return to the atlas</button></p>
+      </header>
+
+      <div class="doc-work" aria-label="Case studies">
+        <h2 class="doc-sec-title lite-only">Selected work</h2>
+
+        <article class="doc-case" id="doc-hip" data-project="hip" data-accent="#8b7bff">
+          <header>
+            <p class="dc-eyebrow">World 01 · Identity · Studio · 2023 — now</p>
+            <h3>Hope in Print</h3>
+            <p class="dc-tag">A studio built on the belief that hope is printable.</p>
+          </header>
+          <dl class="dc-meta">
+            <div><dt>Client</dt><dd>Small businesses, ministries &amp; nonprofits</dd></div>
+            <div><dt>Role</dt><dd>Founder · Creative direction · Everything with a plug</dd></div>
+            <div><dt>Field</dt><dd>Brand, web, print, film &amp; marketing</dd></div>
+          </dl>
+          <div class="dc-overview">
+            <p>Hope in Print began as a question: what does hope look like when you can hold it? The answer became a studio — one that carries small organizations’ stories across every surface they live on, from pressed paper to glowing screen, and makes each one feel lit from inside.</p>
+          </div>
+          <section class="dc-sec"><h4>The challenge</h4>
+            <p>Small businesses, ministries and nonprofits rarely get one team that can hold their whole story — the brand, the website, the print piece, the film, the campaign. They get fragments from different vendors, and the story falls apart between them.</p>
+          </section>
+          <section class="dc-sec"><h4>Strategy</h4>
+            <p>Be the through-line. One studio, one visual system per client, every deliverable speaking the same language — from business card to storefront to Sunday-morning screen. The studio manages the full client lifecycle: discovery, proposal, scope, timelines, feedback, production, launch and post-launch support.</p>
+          </section>
+          <section class="dc-sec"><h4>Process</h4>
+            <ol>
+              <li>Discovery — listening before designing; goals, audience, constraints.</li>
+              <li>Proposal &amp; scope — clear deliverables, honest timelines.</li>
+              <li>Identity &amp; system design — logo, palette, type, voice.</li>
+              <li>Production — web builds, print files, film edits, campaign creative.</li>
+              <li>Launch — deployment, proofing, go-live support.</li>
+              <li>Post-launch — support, iteration and the next chapter.</li>
+            </ol>
+          </section>
+          <section class="dc-sec dc-tools"><h4>Tools &amp; platforms</h4>
+            <ul><li>Adobe Photoshop</li><li>Illustrator</li><li>InDesign</li><li>Premiere Pro</li><li>Figma</li><li>Canva</li><li>Shopify</li><li>BigCommerce</li><li>Squarespace</li><li>Wix</li><li>HTML / CSS / JS</li></ul>
+          </section>
+          <section class="dc-sec"><h4>The solution</h4>
+            <p>Cohesive brand identities and responsive websites that balance visual storytelling with usability and real business goals — plus art direction, photography, video editing and post-production, interactive PDFs, digital devotionals and narrative-driven content. Careful, luminous design that carries an idea further than it could travel alone.</p>
+          </section>
+          <section class="dc-sec dc-results"><h4>Impact</h4>
+            <ul>
+              <li>A working studio serving multiple clients since January 2023.</li>
+              <li>One consistent system per client across digital and physical touchpoints.</li>
+              <li>A studio identity that reads as calm and premium at any size — on paper or on screen.</li>
+            </ul>
+          </section>
+        </article>
+
+        <article class="doc-case" id="doc-matuska" data-project="matuska" data-accent="#6ee7ff">
+          <header>
+            <p class="dc-eyebrow">World 02 · Ecommerce · Web · 2022 — now</p>
+            <h3>Matuska</h3>
+            <p class="dc-tag">A multimillion-dollar storefront, rebuilt for clarity.</p>
+          </header>
+          <dl class="dc-meta">
+            <div><dt>Client</dt><dd>Matuska Taxidermy Supply Company</dd></div>
+            <div><dt>Role</dt><dd>Ecommerce lead · UX &amp; front-end · Merchandising</dd></div>
+            <div><dt>Field</dt><dd>BigCommerce storefront &amp; marketplace operations</dd></div>
+          </dl>
+          <div class="dc-overview">
+            <p>A heritage taxidermy supplier with thousands of reproduction lines needed its catalog untangled — and its custom storefront continuously improved without ever interrupting a working, multimillion-dollar business. Kate leads day-to-day front-end and back-end operations: the site experience, merchandising, content and technical problem-solving.</p>
+          </div>
+          <section class="dc-sec"><h4>The challenge</h4>
+            <p>Depth was drowning discovery. High-volume product families — hundreds of near-identical reproduction lines — buried the range they were meant to showcase. Every fix had to ship into a live storefront with real daily revenue, on a platform with real constraints.</p>
+          </section>
+          <section class="dc-sec"><h4>Strategy</h4>
+            <p>Doorways instead of dumps. Collapse high-volume families into luminous doorway tiles that open into focused, wadeable collections — lake-country fish first, then the whole range — while steadily tuning navigation, product pages and checkout for conversion.</p>
+          </section>
+          <section class="dc-sec"><h4>Process</h4>
+            <ol>
+              <li>Catalog audit — mapping thousands of SKUs into natural families.</li>
+              <li>Architecture — doorway-tile system and collection structure.</li>
+              <li>Build — HTML, CSS and JavaScript through BigCommerce Script Manager and app integrations.</li>
+              <li>Refine — responsive UI, navigation, product pages, checkout workflows.</li>
+              <li>Operate — Amazon Seller Central catalog: bulk uploads, GTIN-exempt listings, parent–child variations, compliance and search-suppression fixes.</li>
+              <li>Iterate — prioritize with leadership, ship, measure, repeat.</li>
+            </ol>
+          </section>
+          <section class="dc-sec dc-tools"><h4>Tools &amp; platforms</h4>
+            <ul><li>BigCommerce</li><li>Script Manager</li><li>HTML / CSS / JavaScript</li><li>App integrations</li><li>Amazon Seller Central</li><li>SEO &amp; merchandising</li></ul>
+          </section>
+          <section class="dc-sec"><h4>The solution</h4>
+            <p>A storefront that reads like a museum wing instead of a warehouse manifest — clear doorways, focused collections, conversion-minded product pages — with marketplace operations running in step so the catalog stays healthy on Amazon too.</p>
+          </section>
+          <section class="dc-sec dc-results"><h4>Impact</h4>
+            <ul>
+              <li>End-to-end ownership of digital operations for a multimillion-dollar ecommerce business.</li>
+              <li>High-volume reproduction families collapsed into navigable doorway collections.</li>
+              <li>Complex platform problems — from checkout workflows to listing compliance — solved in production.</li>
+            </ul>
+          </section>
+        </article>
+
+        <article class="doc-case" id="doc-signal" data-project="signal" data-accent="#ff7ac3">
+          <header>
+            <p class="dc-eyebrow">World 03 · Marketing · Campaigns · 2022 — now</p>
+            <h3>The Signal Season</h3>
+            <p class="dc-tag">Integrated campaigns that travel every channel.</p>
+          </header>
+          <dl class="dc-meta">
+            <div><dt>Client</dt><dd>Matuska Taxidermy Supply Company</dd></div>
+            <div><dt>Role</dt><dd>Campaign strategy · Creative · Deployment &amp; analysis</dd></div>
+            <div><dt>Field</dt><dd>Paid media, email, social &amp; onsite promotion</dd></div>
+          </dl>
+          <div class="dc-overview">
+            <p>A seasonal business runs on seasonal signals. Kate plans and executes integrated marketing across Meta Ads, AdRoll retargeting and display, email, social media and onsite promotions — one story per season, translated faithfully into every channel it travels through.</p>
+          </div>
+          <section class="dc-sec"><h4>The challenge</h4>
+            <p>Channels drift. An ad says one thing, the email another, the landing page a third — and the customer feels the seams. The work was to align audiences, creative, offers and landing pages so a campaign feels like one voice wherever it finds you.</p>
+          </section>
+          <section class="dc-sec"><h4>Strategy</h4>
+            <p>One seasonal narrative, then channel-native translations. Segmented audiences get creative tuned to where they are in the journey; retargeting closes loops instead of shouting; every campaign ends in a performance review that plans the next one.</p>
+          </section>
+          <section class="dc-sec"><h4>Process</h4>
+            <ol>
+              <li>Campaign calendar — seasons, offers and priorities mapped with leadership.</li>
+              <li>Audience segmentation — who hears what, and when.</li>
+              <li>Creative system — ads, email, social and onsite sharing one visual language.</li>
+              <li>Build &amp; deploy — landing pages, email design, scheduling and launch.</li>
+              <li>Retarget — AdRoll display and Meta loops for the almost-customers.</li>
+              <li>Review — results analysis that feeds the next season’s plan.</li>
+            </ol>
+          </section>
+          <section class="dc-sec dc-tools"><h4>Tools &amp; platforms</h4>
+            <ul><li>Meta Ads Manager</li><li>AdRoll</li><li>Email marketing &amp; segmentation</li><li>Social media</li><li>Onsite &amp; seasonal promotions</li><li>Performance review</li></ul>
+          </section>
+          <section class="dc-sec"><h4>The solution</h4>
+            <p>A repeatable campaign engine: audiences, creative, offers and landing pages moving in formation, with email directed end-to-end — from planning and design through segmentation, scheduling, deployment and analysis.</p>
+          </section>
+          <section class="dc-sec dc-results"><h4>Impact</h4>
+            <ul>
+              <li>Integrated campaigns shipped across paid, owned and onsite channels every season.</li>
+              <li>Email marketing owned from first sketch to results analysis.</li>
+              <li>A feedback loop where each season’s data shapes the next season’s signal.</li>
+            </ul>
+          </section>
+        </article>
+
+        <article class="doc-case" id="doc-print" data-project="print" data-accent="#ffd66b">
+          <header>
+            <p class="dc-eyebrow">World 04 · Print · Editorial · 2022 — now</p>
+            <h3>The Paper Field</h3>
+            <p class="dc-tag">Catalogs, magazine ads and print that sells.</p>
+          </header>
+          <dl class="dc-meta">
+            <div><dt>Client</dt><dd>Matuska &amp; studio clients</dd></div>
+            <div><dt>Role</dt><dd>Direction · Layout &amp; design systems · Prepress</dd></div>
+            <div><dt>Field</dt><dd>Print &amp; digital catalogs, magazine ads, collateral</dd></div>
+          </dl>
+          <div class="dc-overview">
+            <p>Print is where design has to keep its promises — no patches after launch. Kate directs the production of large print and digital product catalogs and designs magazine advertisements, brochures, banners, packaging and sales materials that hold one brand system across every channel.</p>
+          </div>
+          <section class="dc-sec"><h4>The challenge</h4>
+            <p>A catalog is a thousand small decisions pretending to be one book: page planning across a huge product range, product content that has to be right, proofing rounds against real print deadlines — while staying unmistakably on-brand next to the website and the email that point to it.</p>
+          </section>
+          <section class="dc-sec"><h4>Strategy</h4>
+            <p>Systems before spreads. A page-planning framework and a design system per catalog, so hundreds of products flow into layouts without hand-carving every page — and a proofing rhythm that catches errors while they’re still cheap.</p>
+          </section>
+          <section class="dc-sec"><h4>Process</h4>
+            <ol>
+              <li>Page planning — the whole book mapped before the first spread.</li>
+              <li>Design system — grids, product blocks, typography, ink discipline.</li>
+              <li>Product content — data, photography and copy wrangled into place.</li>
+              <li>Layout — spreads built inside the system, art-directed where it counts.</li>
+              <li>Proofing — creative reviews and stakeholder sign-off.</li>
+              <li>Prepress — print-ready files, and digital-catalog twins for screens.</li>
+            </ol>
+          </section>
+          <section class="dc-sec dc-tools"><h4>Tools &amp; platforms</h4>
+            <ul><li>Adobe InDesign</li><li>Photoshop</li><li>Illustrator</li><li>Acrobat</li><li>Interactive PDFs</li><li>Photography</li></ul>
+          </section>
+          <section class="dc-sec"><h4>The solution</h4>
+            <p>Large product catalogs — print and digital — delivered on deadline with design systems that make the next edition faster, plus trade-publication advertisements and collateral that keep the brand speaking with one voice on paper.</p>
+          </section>
+          <section class="dc-sec dc-results"><h4>Impact</h4>
+            <ul>
+              <li>Large print and digital catalogs directed from page plan to print-ready files.</li>
+              <li>Magazine advertisements and seasonal materials across trade publications.</li>
+              <li>A consistent brand system maintained across print, web, email and social.</li>
+            </ul>
+          </section>
+        </article>
+
+        <article class="doc-case" id="doc-pixel" data-project="pixel" data-accent="#b8c7ff">
+          <header>
+            <p class="dc-eyebrow">World 05 · Interactive · 3D web · 2025</p>
+            <h3>Hope Pixel</h3>
+            <p class="dc-tag">A two-room dream gallery in a single file.</p>
+          </header>
+          <dl class="dc-meta">
+            <div><dt>Client</dt><dd>Hope in Print — self-initiated</dd></div>
+            <div><dt>Role</dt><dd>Creative direction · CSS-3D engineering</dd></div>
+            <div><dt>Field</dt><dd>Immersive web, zero dependencies</dd></div>
+          </dl>
+          <div class="dc-overview">
+            <p>Hope Pixel is a creative-studio site built as two connected rooms you walk through — an entire gallery, its lighting and its parallax, inside a single HTML file with no libraries at all.</p>
+          </div>
+          <section class="dc-sec"><h4>The challenge</h4>
+            <p>Restraint as spectacle: how much dimension can pure CSS carry before anyone notices there is no engine underneath?</p>
+          </section>
+          <section class="dc-sec"><h4>Strategy</h4>
+            <p>Immersion by default — no popups, no mode switches. The whole site is the gallery; every pixel of chrome that could be removed, was.</p>
+          </section>
+          <section class="dc-sec"><h4>Process</h4>
+            <ol>
+              <li>Room sketches — two spaces, one continuous camera idea.</li>
+              <li>CSS-3D scene graph — perspective, transforms, layered depth.</li>
+              <li>Light &amp; parallax — gradients and motion standing in for a renderer.</li>
+              <li>Performance — one file, no dependencies, nothing to wait for.</li>
+            </ol>
+          </section>
+          <section class="dc-sec dc-tools"><h4>Tools &amp; platforms</h4>
+            <ul><li>HTML</li><li>CSS 3D transforms</li><li>Vanilla JavaScript</li><li>GitHub Pages</li></ul>
+          </section>
+          <section class="dc-sec"><h4>The solution</h4>
+            <p>An immersive two-room gallery that loads instantly, works everywhere CSS does, and proves the studio’s thesis: craft carries further than tooling.</p>
+          </section>
+          <section class="dc-sec dc-results"><h4>Impact</h4>
+            <ul>
+              <li>A complete immersive site in one HTML file, zero dependencies.</li>
+              <li>The foundation of the studio’s experimental practice — which grew into this atlas.</li>
+            </ul>
+          </section>
+        </article>
+
+        <article class="doc-case" id="doc-clover" data-project="clover" data-accent="#7de8b1">
+          <header>
+            <p class="dc-eyebrow">World 06 · Product · Motion · 2026</p>
+            <h3>Clover</h3>
+            <p class="dc-tag">An organic social garden, designed for humans.</p>
+          </header>
+          <dl class="dc-meta">
+            <div><dt>Client</dt><dd>Self-initiated product</dd></div>
+            <div><dt>Role</dt><dd>Product design · Front-end build</dd></div>
+            <div><dt>Field</dt><dd>Social product &amp; interaction design</dd></div>
+          </dl>
+          <div class="dc-overview">
+            <p>Clover is a social feed that grows like a garden instead of an engine. No engagement bait, no infinite noise — a natural feed with hearts shaped like clover leaves and a signup flow designed so only humans can pass through it.</p>
+          </div>
+          <section class="dc-sec"><h4>The challenge</h4>
+            <p>Design a social product without the machinery that makes social products feel bad — and make calm feel alive rather than empty.</p>
+          </section>
+          <section class="dc-sec"><h4>Strategy</h4>
+            <p>Borrow rhythm from meadows: content breathes, saves feel like pressing flowers, search wanders rather than ranks. Let the interface teach the pace.</p>
+          </section>
+          <section class="dc-sec"><h4>Process</h4>
+            <ol>
+              <li>Grove — the first prototype: a feed with no counters.</li>
+              <li>Meadow — the second: motion language and the clover-heart mark.</li>
+              <li>Clover — the third: profiles, saving, search and bot-proof onboarding.</li>
+            </ol>
+          </section>
+          <section class="dc-sec dc-tools"><h4>Tools &amp; platforms</h4>
+            <ul><li>HTML / CSS / JavaScript</li><li>SVG motion</li><li>Vite</li><li>Design system of one</li></ul>
+          </section>
+          <section class="dc-sec"><h4>The solution</h4>
+            <p>A working feed with profiles, saves and search that stays gentle under the thumb — three iterations toward calm, each one shippable.</p>
+          </section>
+          <section class="dc-sec dc-results"><h4>Impact</h4>
+            <ul>
+              <li>A living thesis in humane product design — Grove became Meadow became Clover.</li>
+              <li>Bot-proof onboarding designed for people, not metrics.</li>
+            </ul>
+          </section>
+        </article>
+      </div>
+
+      <!-- ── About (full) ── -->
+      <section class="doc-about" id="doc-about" aria-label="About Kate">
+        <h2 class="doc-sec-title">About</h2>
+        <p>Katelynn “Kate” Noah is an ecommerce &amp; digital experience manager, UI/UX designer and integrated marketer with 4+ years leading the strategy, design, development and marketing of online storefronts and client brands. She currently leads end-to-end digital operations for a multimillion-dollar ecommerce business — translating complex needs into polished, conversion-focused experiences across web, Amazon, email, social and print.</p>
+        <p>Hope in Print is her studio and her thesis: that careful, luminous design can carry an idea further than it could ever travel alone.</p>
+        <div class="doc-xp">
+          <h3>Experience</h3>
+          <ul>
+            <li><strong>Matuska Taxidermy Supply Company</strong> — Freelance Marketing &amp; Design Specialist / Ecommerce Lead <em>Jan 2025 — now</em></li>
+            <li><strong>Matuska Taxidermy Supply Company</strong> — Marketing Coordinator, leading a team of designers <em>Aug 2022 — Dec 2024</em></li>
+            <li><strong>Hope in Print</strong> — Owner · Creative, Web &amp; Marketing Specialist <em>Jan 2023 — now</em></li>
+          </ul>
+          <h3>Education</h3>
+          <ul>
+            <li><strong>Minnesota State University</strong> — B.S. Marketing <em>2016 — 2020</em></li>
+          </ul>
+          <h3>Community</h3>
+          <ul>
+            <li>Sunday School &amp; youth leader — lessons, mentoring, safe rooms to grow in.</li>
+            <li>Meals on Wheels &amp; Feeding Our Communities — meals delivered, tables set.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- ── Capabilities (full) ── -->
+      <section class="doc-cap" id="doc-capabilities" aria-label="Capabilities">
+        <h2 class="doc-sec-title">Capabilities</h2>
+        <p class="doc-sec-lede">Everything below is working knowledge — used in production, most of it weekly.</p>
+        <div class="cap-groups">
+          <div class="cap-group">
+            <h3>Ecommerce &amp; web</h3>
+            <ul><li>BigCommerce</li><li>Shopify</li><li>Squarespace</li><li>Wix</li><li>Amazon Seller Central</li><li>Responsive design</li><li>UI / UX</li><li>Conversion optimization</li><li>SEO</li><li>Web merchandising</li><li>Catalog management</li><li>App integrations</li><li>Script Manager</li><li>HTML</li><li>CSS</li><li>JavaScript</li></ul>
+          </div>
+          <div class="cap-group">
+            <h3>Digital marketing</h3>
+            <ul><li>Meta Ads Manager</li><li>AdRoll</li><li>Retargeting &amp; display</li><li>Email marketing</li><li>Campaign strategy</li><li>Audience segmentation</li><li>Content marketing</li><li>Social media</li><li>Seasonal promotions</li><li>Performance review</li></ul>
+          </div>
+          <div class="cap-group">
+            <h3>Creative &amp; production</h3>
+            <ul><li>Adobe Photoshop</li><li>Illustrator</li><li>InDesign</li><li>Premiere Pro</li><li>Acrobat</li><li>Figma</li><li>Canva</li><li>Brand identity</li><li>Print &amp; digital catalogs</li><li>Magazine ads</li><li>Brochures</li><li>Packaging</li><li>Photography</li><li>Video post-production</li><li>Interactive PDFs</li></ul>
+          </div>
+          <div class="cap-group">
+            <h3>Leadership &amp; operations</h3>
+            <ul><li>Cross-functional collaboration</li><li>Project planning</li><li>Creative direction</li><li>Team coordination</li><li>Stakeholder communication</li><li>Campaign calendars</li><li>Workflow improvement</li><li>Google Workspace</li><li>Microsoft Office</li></ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Process (full) ── -->
+      <section class="doc-proc" id="doc-process" aria-label="Process">
+        <h2 class="doc-sec-title">Process</h2>
+        <p class="doc-sec-lede">Six phases, whether the deliverable is a storefront, a catalog or a campaign. Wonder is welcome; surprises are not.</p>
+        <ol class="proc-steps">
+          <li><h3>Discover</h3><p>Listen first. Goals, audience, constraints and the thing you’re actually trying to say — gathered before anything gets designed.</p></li>
+          <li><h3>Define</h3><p>Scope, timelines and success measures put in writing. The campaign calendar — or the page plan — becomes the contract.</p></li>
+          <li><h3>Design</h3><p>Strategy translated into visual language: identity, UX, layouts, systems. Reviewed with stakeholders while changes are still cheap.</p></li>
+          <li><h3>Build</h3><p>Storefronts, catalogs, campaigns, films — produced inside the system, proofed in rhythm, tested where they’ll actually live.</p></li>
+          <li><h3>Launch</h3><p>Deployment, scheduling, go-live checks. Nothing ships unrehearsed; launch day should be the boring part.</p></li>
+          <li><h3>Grow</h3><p>Post-launch support and performance review. The results of this season quietly design the next one.</p></li>
+        </ol>
+      </section>
+
+      <!-- ── Contact (for the one-page view) ── -->
+      <section class="doc-contact lite-only" aria-label="Contact">
+        <h2 class="doc-sec-title">Let’s create something that doesn’t exist yet.</h2>
+        <p>Email <a href="mailto:katenoah.personal@gmail.com">katenoah.personal@gmail.com</a>, find Kate on
+          <a href="https://www.linkedin.com/in/katelynnnoah" rel="me noopener" target="_blank">LinkedIn</a>,
+          or visit <a href="https://hopeinprint.com" rel="me noopener" target="_blank">hopeinprint.com</a>.</p>
+        <div class="contact-form-mount" data-form-mount></div>
+        <p class="doc-fine">© 2026 Hope in Print · Charted under a living sky.</p>
+      </section>
+
+    </div>
+  </section>
 
   <noscript>
-    <div class="noscript">This portfolio uses JavaScript for its dimensional experience. The content remains available in the sections below.</div>
+    <div class="noscript-note">This sky needs JavaScript for its cards and constellations — but the whole portfolio is right below, no engine required.</div>
+    <style>
+      .doc[hidden]{display:block!important}
+      .lite-only{display:none!important}
+      .hero-hint,.sound-toggle,.menu-toggle{display:none!important}
+    </style>
   </noscript>
 
-  <div id="fallbackNotice" class="fallback-notice" role="status">The dimensional layer could not load. The accessible portfolio is shown instead.</div>
-  <script>
-    window.setTimeout(function () {
-      if (!window.__HOPE_APP_STARTED__) {
-        document.body.classList.add('module-failed');
-        document.getElementById('loader')?.classList.add('is-complete');
-      }
-    }, 9000);
-  </script>
-  <script type="module" src="./app.js"></script>
+  <script src="js/app.js" type="module"></script>
 </body>
 </html>

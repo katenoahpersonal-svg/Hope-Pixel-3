@@ -1,76 +1,86 @@
-# Hope in Print — Dimensional Portfolio Prototype
+# Hope Atlas — Kate Noah · Hope in Print
 
-A procedural, asset-light immersive portfolio built with Three.js, GSAP ScrollTrigger, Lenis, GLSL shaders, and postprocessing.
+A portfolio charted like a night sky. Six worlds of work sit in a constellation
+of glass cards; **everything is clickable and everything opens into a card.**
+No 3D engine, no guide character, no scroll-jacking — the wonder comes from
+light, depth and typography instead.
 
-## Fastest way to open it on Windows
+Built from Kate's real 2026 resume: ecommerce & digital experience, UI/UX,
+integrated campaigns, print production, interactive and product work.
 
-1. Double-click `launch.bat`.
-2. A browser window should open at `http://localhost:8080`.
-3. Keep the black command window open while viewing the site.
-
-If Windows says Python is not installed, install Python from python.org and check **Add Python to PATH** during installation. You can also use VS Code's **Live Server** extension and open `index.html` with Live Server.
-
-## Open it manually
-
-The prototype can run directly from the pinned CDN imports, so no npm installation is required.
-
-Run a local server inside this folder:
+## Run it
 
 ```bash
-python -m http.server 8080
+powershell -NoProfile -ExecutionPolicy Bypass -File serve.ps1
 ```
 
-Then open:
+Then open http://localhost:8394/. It's a static site — no build step, no npm
+install, no dependencies. Only Google Fonts is fetched from the network.
 
-```text
-http://localhost:8080
+## Deploy
+
+Push this folder to GitHub Pages (Settings → Pages → deploy from branch, root).
+`index.html` at the root is all Pages needs. `serve.ps1` and `_snaps/` are
+local dev helpers and can be deleted before publishing.
+
+## Structure
+
+```
+index.html    the whole interface + THE ARCHIVE (all copy lives here) ← edit copy
+css/main.css  design system: sky, glass cards, dialogs, form, reading mode
+js/app.js     one module: starfield, tilt, router, dialogs, form, audio
+serve.ps1     local dev server (port 8394)
 ```
 
-A local server is required because the site uses JavaScript modules. Opening `index.html` directly by double-clicking may be blocked by browser security rules.
+## How the content works
 
-## View it on your phone
+`index.html` → `<section class="doc" id="docArchive">` is the **single source of
+truth** for every word on the site. It holds the six full case studies plus
+About, Capabilities and Process.
 
-1. Connect the computer and phone to the same Wi-Fi.
-2. Run `launch-network.bat`.
-3. Find the computer's IPv4 address in the command window, such as `192.168.1.24`.
-4. On the phone, open `http://YOUR-IP:8080`.
-5. If Windows Firewall asks, allow access on private networks.
+* The card dialogs **clone their content from it** at open time.
+* "Read as one page" reveals it as one calm, styled document (`?lite=1`).
+* `<noscript>` unhides it, so the portfolio is readable with JS disabled.
+* Screen readers and search engines get the real text either way.
 
-## Where to customize
+To change copy, edit the archive. To change a world's color or card art, edit
+its `--accent` in the card markup and its `.art-*` rule in the CSS.
 
-- Portfolio wording and semantic sections: `index.html`
-- Visual design and responsive behavior: `styles.css`
-- 3D worlds, camera path, butterfly, shaders, sound, and interactions: `app.js`
-- Project data: search for `worldData` and `cases` in `app.js`
-- Email/social links: search for `hello@hopeinprint.com` in `index.html`
+## Everything clickable
 
-## Implemented
+| Click | Opens |
+|---|---|
+| Any of the six world cards | Full case study card (challenge → strategy → process → tools → solution → impact) |
+| About / Capabilities / Process cards *or* nav links | The matching card dialog |
+| Card arrows, or ← / → keys | Previous / next world, in place |
+| "All work", ✕, Escape, or the scrim | Closes back to the atlas |
+| Contact form | Composes a prefilled email + shows a confirmation |
 
-- Scroll-driven curved 3D camera flight
-- Mouse parallax across scene layers
-- Local-time dawn/day/dusk/night color grading
-- Procedural particle butterfly guide with idle, dash, and landing behavior
-- Four floating project worlds and clickable portal transitions
-- Procedural nebula, stars, holographic materials, wireframes, bloom, vignette, and chromatic shift
-- Physics-like cursor trail and magnetic interface controls
-- Optional generated ambient Web Audio with audio-reactive lights and particles
-- Semantic HTML beneath the WebGL canvas
-- Keyboard-openable project cards
-- Reduced-motion and simplified mobile modes
-- No required image or audio assets
+Overlays are **hash-routed** (`#w/matuska`, `#about`, `#capabilities`,
+`#process`), so deep links work and the browser Back button behaves: Back steps
+card by card, while ✕ / Escape unwind to the page in one action. Each history
+entry stores its own depth in `history.state`, so the unwind stays correct even
+after the visitor presses Back themselves.
 
-## Production notes
+## The five dimensions, without the engine
 
-This is a high-fidelity creative prototype. Before launch, replace placeholders, connect real case-study routes, test across target devices, compress any added media, add analytics, and host dependencies locally or through your production bundler.
+1. **Space** — layered depth: parallax starfield, drifting nebulae, tilting
+   cards with cursor-tracked glare, staggered constellation grid.
+2. **Time** — the palette shifts with the visitor's local hour (dawn / day /
+   dusk / night). Test with `?phase=dusk`.
+3. **Interaction** — card tilt, magnetic chrome, trailing cursor, reveal-on-
+   scroll, hover glare. Every motion is tied to something clickable.
+4. **Sound** — the nav toggle starts a WebAudio ambient pad, synthesized live
+   (no audio files, never autoplaying).
+5. **Personalization** — reduced-motion support, touch tiers, and a one-page
+   reading mode that persists across visits.
 
+## Accessibility
 
-## Optional Vite workflow
-
-For local package installation and a production build:
-
-```bash
-npm install
-npm run dev
-```
-
-Build the deployable site with `npm run build`.
+* Real `<button>` / `<a>` elements throughout; visible focus rings.
+* Focus is trapped in dialogs and returned to the trigger on close; Escape closes.
+* `prefers-reduced-motion`: no starfield animation, comets, drift, tilt or reveals.
+* Card art is decorative (`aria-hidden`); all meaning is in text.
+* One-page reading mode and `<noscript>` both expose the complete portfolio.
+* Mobile (< 900px): cards stack full width, nav collapses into a menu sheet,
+  no horizontal scroll at 375px.
