@@ -1,202 +1,53 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#070713" />
-  <meta name="description" content="The Infinite Atelier — the immersive multidisciplinary design portfolio of Kate Noah." />
-  <title>The Infinite Atelier — Kate Noah</title>
-  <link rel="stylesheet" href="./styles.css" />
-</head>
-<body>
-  <a class="skip-link" href="#main">Skip to portfolio</a>
-  <canvas id="world" aria-hidden="true"></canvas>
-  <div class="scene-fallback" aria-hidden="true"></div>
-  <div class="atmospheric-veil" aria-hidden="true"></div>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Katelynn Noah — The Studio | Ecommerce, UI/UX & Integrated Marketing</title>
+    <meta
+      name="description"
+      content="Katelynn Noah builds online storefronts and the brand systems around them — design, ecommerce, marketing, and creative production, owned end to end. An immersive portfolio."
+    />
+    <meta name="theme-color" content="#e9e5de" />
+    <meta name="color-scheme" content="light dark" />
 
-  <header class="site-header" aria-label="Primary navigation">
-    <a class="brand" href="#threshold" data-nav="threshold" aria-label="The Infinite Atelier, home">
-      <span class="brand-mark" aria-hidden="true"><i></i><i></i></span>
-      <span><strong>KATE NOAH</strong><small>THE INFINITE ATELIER</small></span>
-    </a>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Katelynn Noah — The Studio" />
+    <meta
+      property="og:description"
+      content="Design · Ecommerce · Marketing · Creative Production. Walk through the work."
+    />
+    <meta property="og:image" content="./social.svg" />
+    <meta name="twitter:card" content="summary_large_image" />
 
-    <button type="button" class="menu-toggle glass-button" aria-expanded="false" aria-controls="main-nav">Menu</button>
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div id="root"></div>
 
-    <nav id="main-nav" class="main-nav" aria-label="Portfolio chapters">
-      <a href="#work" data-nav="work">Work</a>
-      <a href="#archive" data-nav="archive">Archive</a>
-      <a href="#about" data-nav="about">About</a>
-      <a href="#capabilities" data-nav="capabilities">Capabilities</a>
-      <a href="#process" data-nav="process">Process</a>
-      <a href="#contact" data-nav="contact">Contact</a>
-    </nav>
-
-    <div class="utility-nav">
-      <button type="button" id="project-index-button" class="utility-button" data-cursor="Open">Project Index</button>
-      <button type="button" id="sound-toggle" class="icon-button" aria-pressed="false" aria-label="Enable atmospheric sound">Sound off</button>
-      <button type="button" id="motion-toggle" class="icon-button" aria-pressed="true" aria-label="Disable environmental motion">Motion on</button>
-    </div>
-  </header>
-
-  <aside class="chapter-marker" aria-live="polite">
-    <span id="chapter-number">01</span>
-    <i></i>
-    <span id="chapter-name">Threshold</span>
-  </aside>
-
-  <main id="main">
-    <section id="threshold" class="chapter hero" data-chapter="threshold" aria-labelledby="hero-title">
-      <div class="chapter-inner hero-grid">
-        <div class="hero-copy reveal">
-          <p class="eyebrow">KATE NOAH · HOPE IN PRINT</p>
-          <h1 id="hero-title">I turn ideas into worlds people can actually use.</h1>
-          <p class="hero-description">Multidisciplinary design across ecommerce, web, branding, UI/UX, campaigns, print, motion, and creative direction—built with imagination, technical fluency, and obsessive care for the details that make an experience work.</p>
-          <div class="hero-actions">
-            <a class="primary-button" href="#work" data-nav="work" data-cursor="Explore">Enter selected work <span aria-hidden="true">↘</span></a>
-            <button type="button" class="secondary-button" data-open-index data-cursor="Open">Open project index</button>
-          </div>
-          <a class="quiet-link" href="#about" data-nav="about">Discover the atelier <span aria-hidden="true">↓</span></a>
-        </div>
-
-        <div class="hero-sculpture" aria-hidden="true">
-          <div class="glass-plane plane-a"></div>
-          <div class="glass-plane plane-b"></div>
-          <div class="glass-plane plane-c"></div>
-          <div class="type-slab">IDEAS<br><em>INTO</em><br>WORLDS</div>
-          <div class="stair-structure"><i></i><i></i><i></i><i></i><i></i></div>
-          <div class="light-thread"></div>
-        </div>
+    <noscript>
+      <div class="noscript">
+        <h1>Katelynn Noah</h1>
+        <p>
+          Ecommerce &amp; Digital Experience Manager · UI/UX Designer · Integrated Marketing. I build
+          online storefronts and the brand systems that surround them — design, ecommerce, marketing,
+          and production, owned end to end.
+        </p>
+        <p>
+          This portfolio is an interactive 3D space and needs JavaScript. The full written version is
+          available without it:
+          <a href="./Katelynn_Noah_Resume_2026.pdf">download the résumé (PDF)</a> or email
+          <a href="mailto:katenoah.personal@gmail.com">katenoah.personal@gmail.com</a>.
+        </p>
       </div>
-      <div class="scroll-cue" aria-hidden="true"><span></span>Normal scroll. Infinite depth.</div>
-    </section>
+    </noscript>
 
-    <section id="work" class="chapter work-chapter" data-chapter="work" aria-labelledby="work-title">
-      <div class="chapter-inner">
-        <header class="section-heading reveal">
-          <p class="eyebrow">CHAPTER 02 · THE PROJECT CONSTELLATION</p>
-          <h2 id="work-title">Six projects.<br>Six distinct worlds.</h2>
-          <p>Each territory is an interactive case study—built to reveal the thinking, systems, craft, and outcomes behind the surface.</p>
-        </header>
-        <div id="project-territories" class="project-territories" aria-label="Selected projects"></div>
-      </div>
-    </section>
-
-    <section id="archive" class="chapter archive-chapter" data-chapter="archive" aria-labelledby="archive-title">
-      <div class="chapter-inner">
-        <header class="section-heading reveal">
-          <p class="eyebrow">CHAPTER 03 · THE ARCHIVE</p>
-          <h2 id="archive-title">Direct access.<br>No treasure map required.</h2>
-          <p>A calm, traditional index for clients, recruiters, and anyone who prefers the front door to the secret passage.</p>
-        </header>
-        <div id="archive-filters" class="filter-bar" role="group" aria-label="Filter projects"></div>
-        <div id="archive-list" class="archive-list"></div>
-      </div>
-    </section>
-
-    <section id="about" class="chapter about-chapter" data-chapter="about" aria-labelledby="about-title">
-      <div class="chapter-inner about-layout">
-        <div class="section-heading reveal">
-          <p class="eyebrow">CHAPTER 04 · THE INNER STUDIO</p>
-          <h2 id="about-title">Strategy in the bones.<br>Wonder in the light.</h2>
-          <p>Katelynn “Kate” Noah is a multidisciplinary designer working across ecommerce, web experiences, UI/UX, branding, print production, campaigns, video, motion, and creative direction.</p>
-          <p>Her work lives at the intersection of imagination and execution—where visual storytelling, technical systems, business needs, and human experience meet.</p>
-          <p>She manages and improves complex digital environments while building brands, websites, catalogs, campaigns, interfaces, and visual worlds designed to function beautifully in real life.</p>
-        </div>
-
-        <div class="studio-installation reveal" aria-label="Interactive studio artifacts">
-          <div class="portrait-frame" aria-label="Portrait area">
-            <div class="portrait-light"></div>
-            <span>KATE<br>NOAH</span>
-            <small>MULTIDISCIPLINARY DESIGNER</small>
-          </div>
-          <div id="studio-artifacts" class="artifact-grid"></div>
-        </div>
-      </div>
-    </section>
-
-    <section id="capabilities" class="chapter capabilities-chapter" data-chapter="capabilities" aria-labelledby="capabilities-title">
-      <div class="chapter-inner">
-        <header class="section-heading reveal">
-          <p class="eyebrow">CHAPTER 05 · THE MATERIAL LIBRARY</p>
-          <h2 id="capabilities-title">Capabilities made tangible.</h2>
-          <p>Open a material drawer to see the tools, practical applications, connected projects, and outcomes behind each discipline.</p>
-        </header>
-        <div id="capability-library" class="capability-library"></div>
-      </div>
-    </section>
-
-    <section id="process" class="chapter process-chapter" data-chapter="process" aria-labelledby="process-title">
-      <div class="chapter-inner process-layout">
-        <header class="section-heading reveal">
-          <p class="eyebrow">CHAPTER 06 · THE PROCESS ENGINE</p>
-          <h2 id="process-title">A flexible system for making the impossible practical.</h2>
-          <p>The process bends to the project, but every stage protects the same thing: clarity, intention, craftsmanship, and a result that works after launch day.</p>
-        </header>
-        <div id="process-engine" class="process-engine"></div>
-      </div>
-    </section>
-
-    <section id="contact" class="chapter contact-chapter" data-chapter="contact" aria-labelledby="contact-title">
-      <div class="chapter-inner contact-layout">
-        <div class="section-heading reveal">
-          <p class="eyebrow">CHAPTER 07 · THE OPEN DOOR</p>
-          <h2 id="contact-title">Let’s create something that doesn’t exist yet.</h2>
-          <p>Have a project, a strange idea, a complicated system, or a world waiting to be built? Let’s talk.</p>
-          <div class="contact-links">
-            <a href="mailto:hello@kate-noah.com">hello@kate-noah.com</a>
-            <a href="#" aria-label="Kate Noah on LinkedIn">LinkedIn ↗</a>
-            <a href="#threshold">theinfiniteatelier.com</a>
-          </div>
-        </div>
-
-        <form id="contact-form" class="contact-form glass-panel reveal" novalidate>
-          <div class="form-grid">
-            <label>Name<input name="name" autocomplete="name" required /></label>
-            <label>Email<input type="email" name="email" autocomplete="email" required /></label>
-            <label>Company<input name="company" autocomplete="organization" /></label>
-            <label>Project type<select name="projectType" required><option value="">Choose one</option><option>Website / Ecommerce</option><option>Brand / Campaign</option><option>Print / Editorial</option><option>Video / Motion</option><option>Creative Direction</option><option>Something wonderfully strange</option></select></label>
-            <label>Budget range<select name="budget"><option value="">Select range</option><option>Under $5,000</option><option>$5,000–$15,000</option><option>$15,000–$30,000</option><option>$30,000+</option><option>Let’s define it together</option></select></label>
-            <label>Desired timeline<input name="timeline" placeholder="Example: Fall 2026" /></label>
-          </div>
-          <label>Message<textarea name="message" rows="6" required placeholder="Tell me what you’re imagining, untangling, or hoping to build."></textarea></label>
-          <p id="form-error" class="form-error" role="alert"></p>
-          <button class="primary-button submit-button" type="submit" data-cursor="Send">Send into the atelier <span aria-hidden="true">↗</span></button>
-          <div id="form-success" class="form-success" hidden role="status">
-            <span aria-hidden="true">✦</span>
-            <strong>Your message crossed the threshold.</strong>
-            <p>Thank you. The atelier is listening.</p>
-          </div>
-        </form>
-      </div>
-      <footer class="site-footer"><span>© 2026 Kate Noah</span><span>Built where design, systems, and imagination meet.</span><a href="#threshold">Return to threshold ↑</a></footer>
-    </section>
-  </main>
-
-  <dialog id="project-dialog" class="project-dialog">
-    <div class="dialog-shell">
-      <button type="button" class="dialog-close" data-close-project aria-label="Close case study" data-cursor="Close">Close <span aria-hidden="true">×</span></button>
-      <article id="project-content" class="project-content"></article>
-    </div>
-  </dialog>
-
-  <dialog id="index-dialog" class="index-dialog">
-    <div class="dialog-shell index-shell">
-      <header><div><p class="eyebrow">PROJECT INDEX</p><h2>Choose a world.</h2></div><button type="button" class="dialog-close" data-close-index aria-label="Close project index" data-cursor="Close">Close <span aria-hidden="true">×</span></button></header>
-      <div id="project-index-list" class="project-index-list"></div>
-    </div>
-  </dialog>
-
-  <dialog id="artifact-dialog" class="artifact-dialog">
-    <div class="dialog-shell artifact-shell">
-      <button type="button" class="dialog-close" data-close-artifact aria-label="Close artifact details">Close <span aria-hidden="true">×</span></button>
-      <div id="artifact-content"></div>
-    </div>
-  </dialog>
-
-  <div id="cursor" class="custom-cursor" aria-hidden="true"><span></span></div>
-  <div id="screen-reader-status" class="sr-only" aria-live="polite"></div>
-
-  <script src="./data.js"></script>
-  <script src="./app.js"></script>
-</body>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
 </html>

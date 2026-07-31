@@ -1,122 +1,148 @@
-# The Infinite Atelier
+# The Studio — Katelynn Noah
 
-An immersive, accessible dimensional portfolio prototype for Kate Noah / Hope in Print.
+An immersive 3D portfolio. The work is not laid out on a page; it hangs in a
+gallery you walk through. Scroll flies the camera down a hall of lit display
+panels, the daylight tracks your local clock, and clicking a panel dollies you
+in and opens the full case study.
 
-This build turns the portfolio into one continuous architectural world while keeping the experience readable, keyboard-accessible, mobile-friendly, and compatible with normal browser scrolling.
+Design · Ecommerce · Marketing · Creative Production.
 
-## What is included
+---
 
-- A custom generative dimensional canvas environment with chapter-specific architecture
-- The Threshold hero
-- Six unique project territories
-- Full editorial case-study overlays
-- Browser Back and Forward support for `/work/project-slug` routes
-- Direct project index
-- Filterable archive
-- Interactive About artifacts
-- Expandable capability library
-- Interactive six-stage process
-- Accessible contact form and in-world success state
-- Optional atmospheric sound, off by default
-- Motion toggle and `prefers-reduced-motion` support
-- Desktop custom cursor with contextual labels
-- Purpose-built mobile layout
-- Static visual fallback when canvas is unavailable
-- No external libraries, fonts, image requests, or build dependencies
-
-## Run locally
-
-1. Install Node.js 18 or newer.
-2. Open a terminal in this folder.
-3. Run:
+## Running it
 
 ```bash
-npm start
+npm install
 ```
 
-4. Open:
-
-```text
-http://localhost:4173
+```bash
+npm run dev
 ```
 
-The local Node server includes a History API fallback, so direct case-study URLs such as `/work/matuska` work correctly.
+Then open http://localhost:8395.
 
-You may also open `index.html` directly. In direct-file mode, the project automatically uses hash routes such as `#/work/matuska` because a browser cannot provide server-side URL fallback from a local file.
+```bash
+npm run build
+```
 
-## Edit portfolio content
+Output lands in `dist/`. `base` is `./`, so it works from any subpath.
 
-All portfolio content is stored in `data.js`:
+## Deploying
 
-- `projects`
-- project case-study sections
-- results and impact
-- studio artifacts
-- capabilities and tools
-- process stages
+`.github/workflows/deploy.yml` builds and publishes to GitHub Pages on every
+push to `main`. In the repo settings, set **Pages → Source → GitHub Actions**
+once and it runs itself.
 
-The scene logic is kept separate in `app.js`, so project copy can be changed without editing the dimensional environment.
+---
 
-## Contact form
+## Where the content lives
 
-The included form provides complete client-side validation and a polished confirmation state. It intentionally does not transmit personal data until a form service is selected.
+**Everything you would want to edit is in [`src/data/content.js`](src/data/content.js).**
+Nothing else needs touching to change copy, projects, or the shape of the
+building. Lines marked `// VERIFY` are the ones to confirm before launch — see
+[VERIFY.md](VERIFY.md).
 
-To connect it, replace the success branch inside `setupContactForm()` in `app.js` with one of the following:
+That file holds:
 
-- Netlify Forms
-- Formspree
-- Basin
-- a serverless function
-- a custom API endpoint
+| Export | What it controls |
+| --- | --- |
+| `identity` | Name, positioning statement, email, links, availability |
+| `hallProfile` | **The architecture.** Centre line, half width and ceiling height at each depth. Widen a row and a room opens; move `cx` and the hall bends. |
+| `sections` | The seven rooms, where the nav walks you to, and where each takes over the interface |
+| `projects` | The eight flagship case studies |
+| `panelPlacement` / `featured` | Which wall each panel hangs on, and at what depth |
+| `about`, `expertise`, `resume`, `studioWork`, `contact` | The written sections |
 
-## Deployment
+## How it is built
 
-### Vercel
+- **React Three Fiber + drei** for the scene, **GSAP + Lenis** for scroll,
+  **@react-three/postprocessing** for bloom, depth of field and vignette,
+  **zustand** for state.
+- **No asset downloads.** Every surface, artwork, label and résumé sheet is
+  drawn into a 2D canvas at runtime (`src/lib/textures.js`) and uploaded as a
+  texture. No HDRI, no GLTF, no image files — which is why it loads instantly
+  and works offline. The environment map is baked in-scene from drei
+  lightformers.
+- **The hall is one generated mesh.** `src/three/Hall.jsx` samples
+  `hallProfile` every half metre and extrudes floor, walls, ceiling and the
+  ceiling light slot as four quad strips, with ambient occlusion baked into
+  vertex colours.
 
-1. Upload the folder to a Git repository.
-2. Import the repository into Vercel.
-3. Use the default static deployment settings.
-4. `vercel.json` already includes the route fallback.
+### The five dimensions
 
-### Netlify
+1. **Space** — scroll walks the camera down the hall; the pointer orbits it;
+   panels swing into view as you approach and the camera leans toward whichever
+   one you are nearest.
+2. **Time** — `src/lib/palette.js` blends four daylight anchors against your
+   local clock, so 4:40pm is genuinely between midday and dusk. It drives the
+   sun, the environment, the fog, the bloom, the accent colour and the
+   interface theme. The chip in the nav overrides it by hand.
+3. **Interaction** — panels lift, tilt toward the pointer and drag a highlight
+   across the glass; clicking dollies the camera in and opens the case study.
+   Interface buttons are magnetic.
+4. **Sound** — entirely synthesised WebAudio (`src/lib/audio.js`): a brown-noise
+   room tone under two quiet drones, plus a materialised click. Opt-in only,
+   never autoplayed.
+5. **Reactivity** — the gallery publishes a focal point every frame
+   (`src/three/focus.js`) and depth of field follows it, so the panel you are
+   standing at is sharp and the rest of the room falls away. Scroll velocity
+   widens the bokeh and changes how hard the camera eases.
 
-1. Drag the folder into Netlify Drop or connect the repository.
-2. Set the publish directory to `.`.
-3. `netlify.toml` already includes the route fallback.
+### Quality tiers
 
-### GitHub Pages
+Detected from viewport and device (`detectQuality` in `src/state/store.js`),
+overridable with `?quality=`.
 
-GitHub Pages does not provide native History API fallback for arbitrary paths. The easiest option is to deploy with hash routing:
+| Tier | Floor reflections | Real glass | Depth of field | Shadows | DPR |
+| --- | --- | --- | --- | --- | --- |
+| `high` | yes | transmission | yes | yes | 2 |
+| `mid` | no | no | yes | no | 1.5 |
+| `low` | no | no | no | no | 1.5 |
 
-1. In `app.js`, set `const isFile = true;` or replace the routing helper with hash-only routing.
-2. Push the folder to a repository.
-3. Enable Pages from the repository root.
+Field of view is aspect-aware: the horizontal angle is held steady so a tall
+phone screen does not end up looking through a slot.
 
-For clean `/work/...` URLs, use Vercel or Netlify.
+### The flat layout
 
-## Accessibility notes
+Visitors with `prefers-reduced-motion: reduce`, without WebGL, or on `?flat=1`
+get [`src/ui/FlatSite.jsx`](src/ui/FlatSite.jsx) — the same words and the same
+work, laid out flat and quiet. three.js is a lazy import, so those visitors
+never download it at all (~60 kB gzipped instead of ~410 kB).
 
-- Semantic headings and section landmarks
-- Skip link
-- Minimum 44px interaction targets
-- Keyboard-operable project cards, filters, artifacts, capability drawers, process stages, dialogs, and form
-- Native modal dialogs with Escape behavior
-- Visible focus states
-- Reduced-motion behavior
-- Screen-reader status announcements
-- No essential information is stored only in the canvas
-- Sound is optional and disabled by default
+In 3D mode the full text is still in the DOM under the canvas as a
+screen-reader-only `<main>`, so crawlers and assistive tech get everything.
 
-## Performance notes
+### Accessibility
 
-The world uses a lightweight Canvas 2D projection system rather than heavy external 3D dependencies. It automatically lowers detail on smaller or lower-core devices, caps pixel density, pauses when the tab is hidden, and keeps the HTML content independent from scene rendering.
+Real `<button>`s for every panel in the work index, focus-trapped dialogs with
+Escape to close, hash-routed case studies (`#bigcommerce`) that survive Back,
+visible focus rings, and keyboard shortcuts: **1–8** open a case study,
+**Home**/**End** jump to either end of the hall.
 
-## Files
+---
 
-- `index.html` — semantic application shell
-- `styles.css` — full visual system and responsive behavior
-- `data.js` — editable structured content
-- `app.js` — interactions, routing, accessibility, sound, and dimensional environment
-- `server.js` — zero-dependency local server with route fallback
-- `vercel.json` — Vercel routing
-- `netlify.toml` — Netlify routing
+## Query parameters
+
+| Parameter | Effect |
+| --- | --- |
+| `?flat=1` / `?flat=0` | Force the flat layout on or off |
+| `?quality=high\|mid\|low` | Force a quality tier |
+| `?phase=morning\|midday\|golden\|night` | Force a daylight phase |
+| `?hour=18.5` | Force a specific hour |
+| `?drive` | Stop the frameloop and expose `window.__drive(n)` to step frames by hand |
+
+`?drive` exists because a backgrounded tab receives no animation frames at all.
+With it, `window.__seek(t)` sets scroll progress and `window.__drive(n)` renders
+`n` frames synchronously — enough to screenshot the canvas from a console.
+
+## Two things worth knowing before you change the 3D code
+
+- **The scene is mounted once.** `src/three/Stage.jsx` hand-mounts a
+  react-three-fiber root instead of using `<Canvas>`, because `<Canvas>` waits
+  on a ResizeObserver that a backgrounded tab never fires. Calling `render()`
+  again on a manual root remounts the entire tree, so the scene reads its state
+  from the zustand store rather than from props passed down through `<Stage>`.
+- **Clamp your frame deltas.** Everything eases with `MathUtils.damp`, which
+  folds the previous value back in, so a single non-finite delta poisons a
+  smoothed value permanently and the camera never recovers. Use `safeDt` from
+  `src/lib/math.js` in every `useFrame`.
