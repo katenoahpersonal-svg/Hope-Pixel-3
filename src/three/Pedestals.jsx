@@ -51,16 +51,16 @@ function Specimen({ kind, metal, hover }) {
       {kind === 'glass' && (
         <mesh castShadow rotation={[0, 0, 0.06]}>
           <boxGeometry args={[0.44, 0.6, 0.055]} />
+          {/* No `transmission` here either — see the note in Panel.jsx. */}
           <meshPhysicalMaterial
-            color="#ffffff"
+            color="#dfe4ff"
             transparent
-            opacity={0.55}
-            transmission={0.75}
-            thickness={0.4}
-            ior={1.5}
-            roughness={0.03}
+            opacity={0.34}
+            roughness={0.02}
+            metalness={0}
             clearcoat={1}
-            envMapIntensity={2.4}
+            clearcoatRoughness={0.02}
+            envMapIntensity={3}
           />
         </mesh>
       )}
@@ -112,7 +112,7 @@ function Pedestal({ item, spot, palette }) {
   const glow = useRef()
   const metal = useMemo(() => brushedMetalMap(512), [])
   const blob = useMemo(() => shadowBlob(256), [])
-  const plate = useMemo(() => pedestalTexture(item, palette.accent), [item, palette.accent])
+  const plate = useMemo(() => pedestalTexture(item, palette.accentInk), [item, palette.accentInk])
 
   const { cx } = hallAt(spot.z)
   const x = cx + spot.side * OFFSET
@@ -143,7 +143,9 @@ function Pedestal({ item, spot, palette }) {
         }}
         onPointerOut={() => setHovered(false)}
       >
-        <meshStandardMaterial color={palette.dark ? '#3a3a38' : '#e0dad0'} roughness={0.88} metalness={0.02} envMapIntensity={0.7} />
+        {/* Pale stone even after hours — a dark plinth would swallow the
+            engraved face, and lit stone against midnight is the whole point. */}
+        <meshStandardMaterial color={palette.dark ? '#d8d4e8' : '#e0dad0'} roughness={0.88} metalness={0.02} envMapIntensity={0.7} />
       </RoundedBox>
 
       {/* cap */}

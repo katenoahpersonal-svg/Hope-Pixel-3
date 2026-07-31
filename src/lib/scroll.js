@@ -65,8 +65,13 @@ export function isLocked() {
 /** Test hook: set progress directly when there is no RAF to rely on. */
 if (typeof window !== 'undefined') {
   window.__seek = (t) => {
-    frame.target = Math.max(0, Math.min(1, t))
-    frame.t = frame.target
-    if (lenis) lenis.scrollTo(frame.target * maxScroll(), { immediate: true, force: true })
+    const at = Math.max(0, Math.min(1, t))
+    if (lenis) lenis.scrollTo(at * maxScroll(), { immediate: true, force: true })
+    else window.scrollTo(0, at * maxScroll())
+    // Assert after the scroll, not before: Lenis emits synchronously and would
+    // otherwise overwrite this with a stale position when no rAF is running to
+    // finish its animation.
+    frame.target = at
+    frame.t = at
   }
 }

@@ -59,16 +59,17 @@ export default function Effects({ palette, quality }) {
       multisampling={quality === 'high' ? 4 : quality === 'mid' ? 2 : 0}
       enableNormalPass={false}
     >
-      {enableDof ? (
+      {/* `{cond && <Effect/>}` — never a Fragment. EffectComposer reads its
+          children as effects, and React.Children.toArray drops false but keeps
+          a Fragment, which breaks the composer when the tier changes. */}
+      {enableDof && (
         <DepthOfField
           ref={dof}
           target={focus.point}
           worldFocusRange={2.4}
           bokehScale={1}
-          resolutionScale={quality === 'high' ? 1 : 0.6}
+          resolutionScale={quality === 'high' ? 0.75 : 0.5}
         />
-      ) : (
-        <></>
       )}
       <Bloom
         ref={bloom}

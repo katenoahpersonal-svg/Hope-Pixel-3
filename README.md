@@ -73,10 +73,16 @@ That file holds:
 1. **Space** — scroll walks the camera down the hall; the pointer orbits it;
    panels swing into view as you approach and the camera leans toward whichever
    one you are nearest.
-2. **Time** — `src/lib/palette.js` blends four daylight anchors against your
-   local clock, so 4:40pm is genuinely between midday and dusk. It drives the
-   sun, the environment, the fog, the bloom, the accent colour and the
-   interface theme. The chip in the nav overrides it by hand.
+2. **Time** — the studio is always after hours. `src/lib/palette.js` blends four
+   midnight anchors against your local clock — Small hours, First light, Blue
+   hour, Violet hour — so 4:40pm is genuinely between two of them. It drives the
+   sun, the environment, the fog, the bloom, the accent and the interface theme.
+   The room never goes bright; what changes is temperature and how much light is
+   in the air. The chip in the nav overrides it by hand.
+
+   `accentInk`, `signInk` and `signAccent` are deliberately identical in all four
+   phases. Canvas textures are memoised on them, and a value that drifted with
+   the clock would silently redraw every panel in the building once a minute.
 3. **Interaction** — panels lift, tilt toward the pointer and drag a highlight
    across the glass; clicking dollies the camera in and opens the case study.
    Interface buttons are magnetic.
@@ -93,11 +99,19 @@ That file holds:
 Detected from viewport and device (`detectQuality` in `src/state/store.js`),
 overridable with `?quality=`.
 
-| Tier | Floor reflections | Real glass | Depth of field | Shadows | DPR |
-| --- | --- | --- | --- | --- | --- |
-| `high` | yes | transmission | yes | yes | 2 |
-| `mid` | no | no | yes | no | 1.5 |
-| `low` | no | no | no | no | 1.5 |
+| Tier | Floor reflections | Depth of field | Shadows | Max DPR |
+| --- | --- | --- | --- | --- |
+| `high` | yes | yes | yes | 1.75 |
+| `mid` | no | yes | no | 1.35 |
+| `low` | no | no | no | 1 |
+
+`PerfGuard` in `src/three/Scene.jsx` measures the real frame rate and steps the
+tier **down** if the machine cannot hold 45fps — never back up, because
+oscillating between tiers reads worse than simply running at the lower one.
+
+Nothing uses `transmission`. It looks lovely and costs an entire extra render of
+the scene every frame; in a dark room, reflection and clearcoat read as glass
+just as well for free.
 
 Field of view is aspect-aware: the horizontal angle is held steady so a tall
 phone screen does not end up looking through a slot.
@@ -146,3 +160,8 @@ With it, `window.__seek(t)` sets scroll progress and `window.__drive(n)` renders
   folds the previous value back in, so a single non-finite delta poisons a
   smoothed value permanently and the camera never recovers. Use `safeDt` from
   `src/lib/math.js` in every `useFrame`.
+- **Never put a Fragment inside `<EffectComposer>`.** It reads its children as
+  effects, and `React.Children.toArray` drops `false` but keeps a Fragment — so
+  `{cond ? <Effect/> : <></>}` breaks the composer the moment the condition
+  flips, and the whole scene silently unmounts with no console error. Write
+  `{cond && <Effect/>}`.

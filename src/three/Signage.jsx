@@ -29,8 +29,15 @@ function wallSpot(z, side, inset = 0.04) {
 function HeroType({ palette }) {
   const ref = useRef()
   const tex = useMemo(
-    () => heroTypeTexture({ first: identity.first, last: identity.last, role: 'Design · Ecommerce · Marketing · Creative Production', accent: palette.accent, ink: palette.dark ? '#efe9df' : '#221f1b' }),
-    [palette.accent, palette.dark]
+    () =>
+      heroTypeTexture({
+        first: identity.first,
+        last: identity.last,
+        role: 'Design · Ecommerce · Marketing · Creative Production',
+        accent: palette.signAccent,
+        ink: palette.signInk,
+      }),
+    [palette.signAccent, palette.signInk]
   )
 
   useFrame((state, delta) => {
@@ -69,8 +76,8 @@ function HeroType({ palette }) {
 
 function WallLabel({ text, sub, z, side, y = 3.5, width = 4.6, palette }) {
   const tex = useMemo(
-    () => labelTexture(text, { sub, ink: palette.dark ? '#cfc7b9' : '#3a352e', accent: palette.accent }),
-    [text, sub, palette.dark, palette.accent]
+    () => labelTexture(text, { sub, ink: palette.signInk, accent: palette.signAccent }),
+    [text, sub, palette.signInk, palette.signAccent]
   )
   const spot = useMemo(() => wallSpot(z, side, 0.05), [z, side])
   return (
@@ -87,7 +94,7 @@ function ResumeSheet({ palette, onDownload }) {
   const [hover, setHover] = useState(false)
   const inner = useRef()
   const mat = useRef()
-  const tex = useMemo(() => documentTexture(resume, identity, palette.accent), [palette.accent])
+  const tex = useMemo(() => documentTexture(resume, identity, palette.accentInk), [palette.accentInk])
   const metal = useMemo(() => brushedMetalMap(512), [])
   const spot = useMemo(() => wallSpot(-99, 1, 0.1), [])
 
@@ -149,7 +156,7 @@ function ResumeSheet({ palette, onDownload }) {
  */
 function ContactPlate({ palette }) {
   const mat = useRef()
-  const tex = useMemo(() => contactTexture(identity, palette.accent), [palette.accent])
+  const tex = useMemo(() => contactTexture(identity, palette.accentInk), [palette.accentInk])
   const { cx } = hallAt(CONTACT_Z)
   const x = cx - 3.4
 
@@ -217,11 +224,11 @@ function EndWall({ palette }) {
     () =>
       labelTexture('Studio Work', {
         sub: studioWork.pieces.length + ' pieces · personal',
-        ink: palette.dark ? '#cfc7b9' : '#3a352e',
-        accent: palette.accent,
+        ink: palette.signInk,
+        accent: palette.signAccent,
         align: 'center',
       }),
-    [palette.dark, palette.accent]
+    [palette.signInk, palette.signAccent]
   )
   const { cx } = hallAt(-147)
   return (
@@ -241,10 +248,10 @@ function ChapterMarker({ chapter, z, side, index, palette }) {
     () =>
       labelTexture(chapter.heading, {
         sub: `Chapter 0${index + 1}`,
-        ink: palette.dark ? '#cfc7b9' : '#3b352d',
-        accent: palette.accent,
+        ink: palette.signInk,
+        accent: palette.signAccent,
       }),
-    [chapter.heading, index, palette.dark, palette.accent]
+    [chapter.heading, index, palette.signInk, palette.signAccent]
   )
   const { cx } = hallAt(z)
   const W = 3.2

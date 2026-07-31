@@ -155,9 +155,9 @@ export default function Lighting({ palette, quality }) {
           key={off}
           ref={(el) => (coves.current[i] = el)}
           color={palette.cove}
-          intensity={palette.coveIntensity * (i === 0 ? 26 : 20)}
-          distance={30}
-          decay={1.45}
+          intensity={palette.coveIntensity * (i === 0 ? 30 : 24)}
+          distance={36}
+          decay={1.4}
         />
       ))}
 
@@ -166,7 +166,7 @@ export default function Lighting({ palette, quality }) {
         color={palette.sun}
         intensity={palette.sunIntensity}
         castShadow={shadows}
-        shadow-mapSize={[2048, 2048]}
+        shadow-mapSize={[1024, 1024]}
         shadow-bias={-0.0006}
         shadow-normalBias={0.04}
         // Wide enough that the frustum edge always sits beyond what the fog
@@ -187,9 +187,6 @@ export default function Lighting({ palette, quality }) {
         penumbra={0.92}
         distance={12}
         decay={1.6}
-        castShadow={shadows}
-        shadow-mapSize={[512, 512]}
-        shadow-bias={-0.001}
       />
       <object3D ref={targetA} />
       <spotLight ref={spotB} color={palette.cove} intensity={0} angle={0.7} penumbra={0.95} distance={12} decay={1.7} />

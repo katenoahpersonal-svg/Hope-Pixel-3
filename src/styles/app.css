@@ -3,15 +3,17 @@
    The room is WebGL. Everything you read is real HTML on top of it.
    ================================================================== */
 
+/* The studio is after hours, so midnight is the default — not an override.
+   Putting it on :root means there is no light flash before JS boots. */
 :root {
-  --paper: #f3f0e9;
-  --card: rgba(250, 248, 243, 0.82);
-  --ink: #1e1c18;
-  --ink-soft: #4b453c;
-  --muted: #7d766a;
-  --hair: rgba(30, 28, 24, 0.14);
-  --accent: #b9793f;
-  --shadow: 0 18px 60px -24px rgba(30, 25, 18, 0.42);
+  --paper: #080a16;
+  --card: rgba(21, 25, 48, 0.7);
+  --ink: #eae8f8;
+  --ink-soft: #b6b2d6;
+  --muted: #837fa8;
+  --hair: rgba(190, 186, 235, 0.18);
+  --accent: #a794ff;
+  --shadow: 0 20px 64px -24px rgba(0, 0, 0, 0.85);
 
   --display: 'Instrument Serif', Georgia, 'Times New Roman', serif;
   --text: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
@@ -20,15 +22,16 @@
   --rail: 3.6rem;
 }
 
-:root[data-dark='true'] {
-  --paper: #16181d;
-  --card: rgba(24, 26, 31, 0.78);
-  --ink: #efe9df;
-  --ink-soft: #c7c0b4;
-  --muted: #8f887c;
-  --hair: rgba(239, 233, 223, 0.16);
-  --accent: #d59653;
-  --shadow: 0 18px 60px -24px rgba(0, 0, 0, 0.7);
+/* Kept for any future daylight phase — nothing currently sets this. */
+:root[data-dark='false'] {
+  --paper: #f3f0e9;
+  --card: rgba(250, 248, 243, 0.82);
+  --ink: #1e1c18;
+  --ink-soft: #4b453c;
+  --muted: #7d766a;
+  --hair: rgba(30, 28, 24, 0.14);
+  --accent: #b9793f;
+  --shadow: 0 18px 60px -24px rgba(30, 25, 18, 0.42);
 }
 
 * { box-sizing: border-box; }

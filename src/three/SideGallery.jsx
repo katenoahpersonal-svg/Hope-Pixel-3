@@ -19,8 +19,8 @@ function Piece({ piece, spot, palette }) {
   const [hovered, setHovered] = useState(false)
   const inner = useRef()
   const mat = useRef()
-  const art = useMemo(() => paintTexture(piece, palette.accent), [piece, palette.accent])
-  const plate = useMemo(() => plateTexture(piece.title, piece.meta, palette.dark ? '#cfc7b9' : '#33302a'), [piece, palette.dark])
+  const art = useMemo(() => paintTexture(piece, palette.accentInk), [piece, palette.accentInk])
+  const plate = useMemo(() => plateTexture(piece.title, piece.meta, palette.dark ? '#ccd0ea' : '#33302a'), [piece, palette.dark])
   const blob = useMemo(() => shadowBlob(256), [])
 
   const { cx, hw } = hallAt(spot.z)
@@ -44,7 +44,7 @@ function Piece({ piece, spot, palette }) {
         {/* a plain hardwood float frame */}
         <mesh position={[0, 0, -0.02]} castShadow>
           <boxGeometry args={[W + 0.1, H + 0.1, 0.05]} />
-          <meshStandardMaterial color={palette.dark ? '#4a423a' : '#cdc3b4'} roughness={0.72} metalness={0.05} />
+          <meshStandardMaterial color={palette.dark ? '#2c2648' : '#cdc3b4'} roughness={0.72} metalness={0.05} />
         </mesh>
         <mesh
           position={[0, 0, 0.012]}

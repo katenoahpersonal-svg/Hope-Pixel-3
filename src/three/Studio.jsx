@@ -13,7 +13,7 @@ export default function Studio({ onCreated }) {
 
   return (
     <Stage
-      dpr={[1, quality === 'high' ? 2 : 1.5]}
+      dpr={[1, quality === 'high' ? 1.75 : quality === 'mid' ? 1.35 : 1]}
       shadows={quality === 'high'}
       frameloop={drive ? 'never' : 'always'}
       gl={{

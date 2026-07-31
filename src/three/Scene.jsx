@@ -48,6 +48,57 @@ function Ready() {
   return null
 }
 
+/**
+ * Watches the real frame rate and steps the quality tier down if the machine
+ * cannot hold it. Only ever downward — stepping back up trades a stutter for an
+ * oscillation, which reads worse than simply running at the lower tier.
+ */
+const STEP_DOWN = { high: 'mid', mid: 'low', low: null }
+
+function PerfGuard() {
+  const gl = useThree((s) => s.gl)
+  const frameloop = useThree((s) => s.frameloop)
+  const acc = useRef({ elapsed: 0, frames: 0, slow: 0, warmup: 0 })
+
+  useFrame((_, delta) => {
+    // Hand-stepped frames say nothing about real performance.
+    if (frameloop === 'never') return
+    // A delta over a second means the tab was backgrounded or the machine
+    // stalled on something outside our control — not a frame rate.
+    if (!Number.isFinite(delta) || delta > 1) return
+    const a = acc.current
+
+    // Ignore the first couple of seconds: shaders are still compiling and every
+    // frame in that window is slow no matter what the hardware is.
+    if (a.warmup < 2.5) {
+      a.warmup += delta
+      return
+    }
+
+    a.elapsed += delta
+    a.frames++
+    if (a.elapsed < 1) return
+
+    const fps = a.frames / a.elapsed
+    a.elapsed = 0
+    a.frames = 0
+    a.slow = fps < 45 ? a.slow + 1 : 0
+    if (a.slow < 2) return
+    a.slow = 0
+
+    const { quality, setQuality } = useStore.getState()
+    const next = STEP_DOWN[quality]
+    if (!next) return
+
+    console.info(`[studio] ${Math.round(fps)}fps — stepping quality ${quality} → ${next}`)
+    setQuality(next)
+    gl.setPixelRatio(Math.min(gl.getPixelRatio(), next === 'mid' ? 1.35 : 1))
+    if (next !== 'high') gl.shadowMap.enabled = false
+  })
+
+  return null
+}
+
 export default function Scene() {
   const palette = useStore((s) => s.palette)
   const quality = useStore((s) => s.quality)
@@ -66,6 +117,7 @@ export default function Scene() {
 
       <Rig quality={quality} />
       <Effects palette={palette} quality={quality} />
+      <PerfGuard />
       <Ready />
     </>
   )

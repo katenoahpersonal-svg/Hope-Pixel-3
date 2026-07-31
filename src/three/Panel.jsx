@@ -43,7 +43,7 @@ export default function Panel({
   const camera = useThree((s) => s.camera)
   const open = useStore((s) => s.open)
 
-  const art = useMemo(() => panelArtTexture(project, palette.accent), [project, palette.accent])
+  const art = useMemo(() => panelArtTexture(project, palette.accentInk), [project, palette.accentInk])
   const metal = useMemo(() => brushedMetalMap(512), [])
   const blob = useMemo(() => shadowBlob(256), [])
 
@@ -178,37 +178,23 @@ export default function Panel({
           />
         </mesh>
 
-        {/* glass */}
+        {/* Glass — reflection and clearcoat rather than `transmission`, which
+            makes three re-render the entire scene into a buffer every frame.
+            In a dark room the reflections are what read as glass anyway. */}
         <mesh position={[0, 0, 0.078]} raycast={() => null}>
           <planeGeometry args={[w + 0.02, h + 0.02]} />
-          {glass ? (
-            <meshPhysicalMaterial
-              transparent
-              opacity={0.42}
-              transmission={0.22}
-              thickness={0.16}
-              ior={1.46}
-              roughness={0.035}
-              metalness={0}
-              clearcoat={1}
-              clearcoatRoughness={0.02}
-              specularIntensity={1}
-              envMapIntensity={2.2}
-              color="#ffffff"
-              depthWrite={false}
-            />
-          ) : (
-            <meshPhysicalMaterial
-              transparent
-              opacity={0.16}
-              roughness={0.06}
-              metalness={0}
-              clearcoat={1}
-              envMapIntensity={1.8}
-              color="#ffffff"
-              depthWrite={false}
-            />
-          )}
+          <meshPhysicalMaterial
+            transparent
+            opacity={glass ? 0.2 : 0.13}
+            roughness={0.03}
+            metalness={0}
+            clearcoat={1}
+            clearcoatRoughness={0.02}
+            specularIntensity={1}
+            envMapIntensity={glass ? 2.6 : 1.8}
+            color="#ffffff"
+            depthWrite={false}
+          />
         </mesh>
 
         {/* filtered out — the panel recedes rather than vanishing */}

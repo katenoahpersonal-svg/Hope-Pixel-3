@@ -224,16 +224,16 @@ export default function Hall({ palette, quality }) {
         {reflective ? (
           <MeshReflectorMaterial
             color={floorColor}
-            resolution={512}
-            mixBlur={1.4}
-            mixStrength={1.15}
-            blur={[380, 130]}
+            resolution={256}
+            mixBlur={1.5}
+            mixStrength={1.4}
+            blur={[260, 90]}
             depthScale={1.2}
             minDepthThreshold={0.3}
             maxDepthThreshold={1.4}
-            mirror={0.22}
-            roughness={0.7}
-            metalness={0.1}
+            mirror={0.28}
+            roughness={0.68}
+            metalness={0.14}
             roughnessMap={floorGrain}
           />
         ) : (
