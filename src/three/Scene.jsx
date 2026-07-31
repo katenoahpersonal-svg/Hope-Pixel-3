@@ -17,9 +17,55 @@ import { downloadResume } from '../lib/download'
  * react-three-fiber root tears the scene down and rebuilds it.
  */
 
+const TEXTURE_SLOTS = [
+  'map',
+  'emissiveMap',
+  'alphaMap',
+  'roughnessMap',
+  'metalnessMap',
+  'normalMap',
+  'aoMap',
+]
+
+/**
+ * Push every texture and every shader onto the GPU before the loader retires.
+ *
+ * Otherwise each one is uploaded the first time its object enters the view —
+ * a 1024×1280 canvas texture plus mipmaps, or a fresh shader program, in the
+ * middle of a frame. That is a 100ms stall, and walking the hall hits a fresh
+ * one every few metres, which is exactly what "getting stuck" feels like.
+ */
+async function warmUp(gl, scene, camera) {
+  const seen = new Set()
+  scene.traverse((o) => {
+    const mats = Array.isArray(o.material) ? o.material : o.material ? [o.material] : []
+    for (const m of mats) {
+      for (const slot of TEXTURE_SLOTS) {
+        const tex = m[slot]
+        if (tex?.isTexture && !seen.has(tex.uuid)) {
+          seen.add(tex.uuid)
+          try {
+            gl.initTexture(tex)
+          } catch {
+            /* a texture that will not preload is not worth failing the load for */
+          }
+        }
+      }
+    }
+  })
+  try {
+    if (gl.compileAsync) await gl.compileAsync(scene, camera)
+    else gl.compile(scene, camera)
+  } catch {
+    /* ditto for shader precompilation */
+  }
+  return seen.size
+}
+
 /** Reports the first real frames so the loader can retire honestly. */
 function Ready() {
   const frames = useRef(0)
+  const warmed = useRef(false)
   const setProgress = useStore((s) => s.setProgress)
   const setReady = useStore((s) => s.setReady)
   const gl = useThree((s) => s.gl)
@@ -41,8 +87,19 @@ function Ready() {
 
   useFrame(() => {
     frames.current++
-    if (frames.current <= 6) setProgress(70 + frames.current * 5)
-    if (frames.current === 6) setReady()
+    if (frames.current <= 3) {
+      setProgress(70 + frames.current * 5)
+      return
+    }
+    // One frame has been drawn, so the scene graph is complete — warm it, then
+    // let the loader go.
+    if (warmed.current) return
+    warmed.current = true
+    setProgress(88)
+    warmUp(gl, scene, camera).then(() => {
+      setProgress(100)
+      setReady()
+    })
   })
 
   return null

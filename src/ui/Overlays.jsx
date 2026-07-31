@@ -81,7 +81,7 @@ function Home({ show }) {
 function Work({ show }) {
   const filter = useStore((s) => s.filter)
   const setFilter = useStore((s) => s.setFilter)
-  const focusIdx = useFrameValue(() => frame.focus, -1)
+  const focusIdx = useFrameValue(() => frame.focus, -1, show)
 
   const focusedId =
     focusIdx === -1 ? null : focusIdx >= panelPlacement.length ? featured.id : panelPlacement[focusIdx]?.id
@@ -146,7 +146,7 @@ function Work({ show }) {
 function About({ show }) {
   // Each chapter has a depth in the hall; whichever you are nearest is the one
   // you read.
-  const z = useFrameValue(() => Math.round(frame.camZ), 0)
+  const z = useFrameValue(() => Math.round(frame.camZ), 0, show)
   const active = useMemo(() => {
     let best = 0
     let bestD = Infinity
@@ -179,7 +179,7 @@ function About({ show }) {
 /* ----------------------------------------------------------- expertise */
 
 function Expertise({ show }) {
-  const z = useFrameValue(() => Math.round(frame.camZ), 0)
+  const z = useFrameValue(() => Math.round(frame.camZ), 0, show)
   const pair = z > -82.5 ? 0 : z > -86.5 ? 1 : 2
 
   return (

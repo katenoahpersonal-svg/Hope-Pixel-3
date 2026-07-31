@@ -9,21 +9,38 @@ export default function Loader() {
   const [gone, setGone] = useState(false)
   const [shown, setShown] = useState(0)
 
-  // Ease the number so it never jumps or stalls visibly.
+  /**
+   * Ease the number so it never jumps or stalls visibly — then STOP.
+   *
+   * An asymptotic ease never exactly reaches its target, so a naive loop here
+   * re-renders this component every frame for the life of the page, long after
+   * the loader is hidden, stealing frames from the gallery. Bail out once it is
+   * close enough to read the same, and never run at all once we are done.
+   */
   useEffect(() => {
-    let raf
-    let cancelled = false
+    if (gone) return
+    let raf = 0
+    let alive = true
     const step = () => {
-      if (cancelled) return
-      setShown((v) => v + (progress - v) * 0.12)
+      if (!alive) return
+      let settled = false
+      setShown((v) => {
+        const next = v + (progress - v) * 0.12
+        if (Math.abs(progress - next) < 0.1) {
+          settled = true
+          return progress
+        }
+        return next
+      })
+      if (settled) return
       raf = requestAnimationFrame(step)
     }
     raf = requestAnimationFrame(step)
     return () => {
-      cancelled = true
+      alive = false
       cancelAnimationFrame(raf)
     }
-  }, [progress])
+  }, [progress, gone])
 
   useEffect(() => {
     if (!ready) return

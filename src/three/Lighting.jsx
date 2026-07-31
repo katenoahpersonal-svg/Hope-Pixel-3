@@ -75,7 +75,10 @@ export default function Lighting({ palette, quality }) {
   const targetA = useRef()
   const targetB = useRef()
   const coves = useRef([])
-  const layout = useMemo(panelLayout, [])
+  const panels = useMemo(() => {
+    const l = panelLayout()
+    return [l.hero, ...l.wall]
+  }, [])
 
   const shadows = quality === 'high'
 
@@ -105,28 +108,43 @@ export default function Lighting({ palette, quality }) {
       sun.current.target.updateMatrixWorld()
     }
 
-    // Two gallery spots follow the two nearest panels.
-    const all = [layout.hero, ...layout.wall]
-      .map((p) => ({ p, d: camera.position.distanceTo(p.centre) }))
-      .sort((a, b) => a.d - b.d)
+    // Two gallery spots follow the two nearest panels. Scanned for the best two
+    // rather than mapped and sorted — this runs every frame, and building nine
+    // objects plus an array plus a sort each time is pure garbage collection.
+    let bestP = null
+    let bestD = Infinity
+    let secondP = null
+    let secondD = Infinity
+    for (const p of panels) {
+      const d = camera.position.distanceTo(p.centre)
+      if (d < bestD) {
+        secondP = bestP
+        secondD = bestD
+        bestP = p
+        bestD = d
+      } else if (d < secondD) {
+        secondP = p
+        secondD = d
+      }
+    }
 
-    const assign = (light, target, entry) => {
+    const assign = (light, target, panel, d) => {
       if (!light.current || !target.current) return
-      if (!entry || entry.d > 16) {
+      if (!panel || d > 16) {
         light.current.intensity = 0
         return
       }
-      const c = entry.p.centre
-      const n = tmp.set(Math.sin(entry.p.rotation[1]), 0, Math.cos(entry.p.rotation[1]))
+      const c = panel.centre
+      const n = tmp.set(Math.sin(panel.rotation[1]), 0, Math.cos(panel.rotation[1]))
       light.current.position.set(c.x + n.x * 1.9, c.y + 2.35, c.z + n.z * 1.9)
       target.current.position.copy(c)
       target.current.updateMatrixWorld()
-      const falloff = THREE.MathUtils.clamp(1 - (entry.d - 4) / 12, 0.12, 1)
-      light.current.intensity = 13 * falloff * (palette.id === 'night' ? 1.5 : 1)
+      const falloff = THREE.MathUtils.clamp(1 - (d - 4) / 12, 0.12, 1)
+      light.current.intensity = 15 * falloff
     }
 
-    assign(spotA, targetA, all[0])
-    assign(spotB, targetB, all[1])
+    assign(spotA, targetA, bestP, bestD)
+    assign(spotB, targetB, secondP, secondD)
   })
 
   return (
@@ -136,7 +154,10 @@ export default function Lighting({ palette, quality }) {
         resolution={256}
         frames={1}
         environmentIntensity={palette.env}
-        key={`${palette.from}-${Math.round(palette.mix * 3)}`}
+        // Re-bakes only when the nearest phase actually changes. Keying on the
+        // blend amount re-rendered the cube map several times per transition,
+        // and each bake is six scene renders.
+        key={palette.id}
       >
         <color attach="background" args={[palette.dark ? '#0d0e12' : '#8c877d']} />
         {/* the ceiling cove, the dominant source */}

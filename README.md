@@ -149,6 +149,25 @@ visible focus rings, and keyboard shortcuts: **1–8** open a case study,
 With it, `window.__seek(t)` sets scroll progress and `window.__drive(n)` renders
 `n` frames synchronously — enough to screenshot the canvas from a console.
 
+## Keeping it smooth
+
+The scene is warmed before the loader retires (`warmUp` in `src/three/Scene.jsx`):
+every texture is pushed to the GPU with `initTexture` and every shader compiled
+with `compileAsync`. Without it, each object uploads its 1024×1280 canvas texture
+and compiles its program the first time it enters view — a ~100ms stall every few
+metres of hall, which reads as the whole thing getting stuck. With it, a full
+traversal holds a worst frame under 10ms.
+
+Two rules that follow from this:
+
+- **Nothing in a `useFrame` may allocate.** No array spreads, no `.map().sort()`,
+  no `new Vector3()`. Use module-level scratch vectors and scan for a minimum
+  instead of sorting.
+- **Nothing may run a `requestAnimationFrame` loop forever.** An asymptotic ease
+  never reaches its target, so a naive `setState` loop re-renders for the life of
+  the page. Stop when it is close enough. `useFrameValue` takes an `active` flag
+  for the same reason — an off-screen overlay should not poll.
+
 ## Two things worth knowing before you change the 3D code
 
 - **The scene is mounted once.** `src/three/Stage.jsx` hand-mounts a

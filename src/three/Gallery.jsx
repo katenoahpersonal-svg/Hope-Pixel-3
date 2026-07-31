@@ -49,6 +49,7 @@ export default function Gallery({ palette, quality }) {
   const filter = useStore((s) => s.filter)
   const openProject = useStore((s) => s.openProject)
   const layout = useMemo(panelLayout, [])
+  const all = useMemo(() => [layout.hero, ...layout.wall], [layout])
 
   const dimmedIds = useMemo(() => {
     if (filter === 'All') return new Set()
@@ -58,19 +59,19 @@ export default function Gallery({ palette, quality }) {
   useFrame((_, delta) => {
     const dt = safeDt(delta)
     // Which panel is the visitor closest to? That one owns the focal plane.
-    let best = -1
+    // No allocation in here — it runs every frame.
+    let nearest = null
     let bestD = Infinity
-    const all = [layout.hero, ...layout.wall]
     for (const p of all) {
       if (dimmedIds.has(p.project.id)) continue
       const d = camera.position.distanceTo(p.centre)
       if (d < bestD) {
         bestD = d
-        best = p.index
+        nearest = p
       }
     }
 
-    const nearest = all.find((p) => p.index === best)
+    const best = nearest ? nearest.index : -1
     const near = nearest && bestD < 11
     frame.focus = near ? best : -1
     const amount = near ? THREE.MathUtils.clamp(1 - (bestD - 3) / 7, 0, 1) : 0
@@ -90,7 +91,7 @@ export default function Gallery({ palette, quality }) {
 
   return (
     <group>
-      {[layout.hero, ...layout.wall].map((p) => (
+      {all.map((p) => (
         <Panel
           key={p.key}
           index={p.index}

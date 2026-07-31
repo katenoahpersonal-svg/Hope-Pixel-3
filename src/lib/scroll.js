@@ -21,19 +21,26 @@ export function initScroll() {
     wheelMultiplier: 0.9,
   })
 
-  let last = 0
-  lenis.on('scroll', ({ scroll: y }) => {
-    const t = Math.min(1, Math.max(0, y / maxScroll()))
-    frame.vel = t - last
-    last = t
-    frame.target = t
-  })
-
   // One ticker for the page. R3F runs its own loop for the scene.
   gsap.ticker.add((time) => lenis.raf(time * 1000))
   gsap.ticker.lagSmoothing(0)
 
   return lenis
+}
+
+/**
+ * Where the visitor has actually scrolled to, 0..1 — sampled, not listened for.
+ *
+ * This reads Lenis's TARGET rather than its animated position on purpose. The
+ * camera does its own frame-rate-correct easing, so taking Lenis's smoothed
+ * value too would stack two lags on top of each other; when frames get scarce
+ * both slow down together and the whole thing feels stuck. One layer of easing,
+ * fed by the raw scroll position, stays responsive at any frame rate.
+ */
+export function scrollProgress() {
+  const y = lenis ? lenis.targetScroll : window.scrollY
+  const t = y / maxScroll()
+  return Number.isFinite(t) ? Math.min(1, Math.max(0, t)) : 0
 }
 
 export function scrollHeightPx() {

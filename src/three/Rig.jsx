@@ -5,6 +5,7 @@ import { panelLayout } from './Gallery'
 import { frame, useStore } from '../state/store'
 import { hallAt, tToZ, sections } from '../data/content'
 import { safeDt, finite } from '../lib/math'
+import { scrollProgress } from '../lib/scroll'
 
 /**
  * The visitor's body in the space. Scroll walks it down the hall, the pointer
@@ -14,6 +15,10 @@ import { safeDt, finite } from '../lib/math'
 
 const EYE = 1.62
 const { damp, clamp } = THREE.MathUtils
+
+/* Scratch vectors — this runs every frame and must not allocate. */
+const normal = new THREE.Vector3()
+const viewPos = new THREE.Vector3()
 
 /**
  * Three.js fov is vertical, so a tall phone screen would otherwise show a very
@@ -42,6 +47,10 @@ function smoothWindow(z, from, to, fade) {
 export default function Rig({ quality }) {
   const camera = useThree((s) => s.camera)
   const layout = useMemo(panelLayout, [])
+  const byIndex = useMemo(
+    () => new Map([layout.hero, ...layout.wall].map((p) => [p.index, p])),
+    [layout]
+  )
   const open = useStore((s) => s.open)
   const setSection = useStore((s) => s.setSection)
 
@@ -51,9 +60,8 @@ export default function Rig({ quality }) {
 
   const openPanel = useMemo(() => {
     if (!open) return null
-    const all = [layout.hero, ...layout.wall]
     // Prefer the wall copy; the entrance panel is only a teaser for the same work.
-    return all.filter((p) => p.project.id === open).pop() || null
+    return layout.wall.find((p) => p.project.id === open) || (layout.hero.project.id === open ? layout.hero : null)
   }, [open, layout])
 
   useFrame((state, delta) => {
@@ -70,14 +78,20 @@ export default function Rig({ quality }) {
 
     // --- scroll easing that reacts to how fast you are scrolling -----------
     frame.t = finite(frame.t)
-    frame.target = finite(frame.target)
-    frame.vel = finite(frame.vel)
     frame.mx = finite(frame.mx)
     frame.my = finite(frame.my)
     frame.focusAmount = finite(frame.focusAmount)
+
+    // Sample the scroll position every frame rather than waiting for events —
+    // events fire on their own schedule (and not at all in a background tab),
+    // and the camera should always know where the page really is.
+    const target = scrollProgress()
+    frame.vel = target - frame.target
+    frame.target = target
+
     const speed = Math.abs(frame.vel) * 60
-    const lambda = 2.6 + Math.min(6.5, speed * 26)
-    frame.t = clamp(damp(frame.t, frame.target, lambda, dt), 0, 1)
+    const lambda = 3.4 + Math.min(7, speed * 26)
+    frame.t = clamp(damp(frame.t, target, lambda, dt), 0, 1)
 
     const z = tToZ(frame.t)
     const { cx, hw } = hallAt(z)
@@ -87,7 +101,7 @@ export default function Rig({ quality }) {
     let sideBias = 0
     let leanTarget = null
     if (frame.focus !== -1) {
-      const p = [layout.hero, ...layout.wall].find((q) => q.index === frame.focus)
+      const p = byIndex.get(frame.focus)
       if (p) {
         sideBias = -p.side * frame.focusAmount * (portrait ? 2.1 : 1.55)
         leanTarget = p.centre
@@ -128,12 +142,12 @@ export default function Rig({ quality }) {
     frame.dolly = damp(frame.dolly, wantDolly, wantDolly ? 3.4 : 4.6, dt)
 
     if (openPanel && frame.dolly > 0.001) {
-      const n = new THREE.Vector3(Math.sin(openPanel.rotation[1]), 0, Math.cos(openPanel.rotation[1]))
+      const rot = openPanel.rotation[1]
       // Stand off to one side so the case study panel does not cover the work.
-      const viewPos = openPanel.centre
-        .clone()
-        .addScaledVector(n, 3.1)
-        .add(new THREE.Vector3(0, -0.35, 0))
+      viewPos
+        .copy(openPanel.centre)
+        .addScaledVector(normal.set(Math.sin(rot), 0, Math.cos(rot)), 3.1)
+      viewPos.y -= 0.35
       const k = frame.dolly * frame.dolly * (3 - 2 * frame.dolly)
       pos.current.lerp(viewPos, k)
       look.current.lerp(openPanel.centre, k)
