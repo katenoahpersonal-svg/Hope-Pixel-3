@@ -158,7 +158,15 @@ and compiles its program the first time it enters view — a ~100ms stall every 
 metres of hall, which reads as the whole thing getting stuck. With it, a full
 traversal holds a worst frame under 10ms.
 
-Two rules that follow from this:
+**Hidden overlays must be hidden to hit-testing too.** `opacity: 0` still catches
+every click and still composites its `backdrop-filter`. `.scrim`, `.study` and
+`.sheet` all switch `visibility` and `pointer-events` off the `data-show`
+attribute, and only attach their blur while actually on screen. Getting this
+wrong on a full-screen element makes the entire site unclickable while scrolling
+keeps working — which reads as a freeze, not as a CSS bug. There is an audit for
+it in the checks below.
+
+Two more rules that follow from this:
 
 - **Nothing in a `useFrame` may allocate.** No array spreads, no `.map().sort()`,
   no `new Vector3()`. Use module-level scratch vectors and scan for a minimum
@@ -167,6 +175,16 @@ Two rules that follow from this:
   never reaches its target, so a naive `setState` loop re-renders for the life of
   the page. Stop when it is close enough. `useFrameValue` takes an `active` flag
   for the same reason — an off-screen overlay should not poll.
+
+### A check worth re-running after any overlay change
+
+Paste this in the console. It lists anything positioned that covers a third of
+the viewport and can still take clicks. Only `DIV.stage` — the canvas — should
+ever appear.
+
+```js
+const W=innerWidth,H=innerHeight;[...document.querySelectorAll('body *')].filter(el=>{const c=getComputedStyle(el);if(!/fixed|absolute/.test(c.position)||c.pointerEvents==='none'||c.visibility==='hidden')return false;const r=el.getBoundingClientRect();return (Math.max(0,Math.min(r.right,W)-Math.max(r.left,0))*Math.max(0,Math.min(r.bottom,H)-Math.max(r.top,0)))/(W*H)>0.3}).map(el=>el.className||el.tagName)
+```
 
 ## Two things worth knowing before you change the 3D code
 

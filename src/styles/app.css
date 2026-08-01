@@ -638,17 +638,29 @@ a { color: inherit; }
    Case study dialog
    ================================================================== */
 
+/* An `opacity: 0` overlay still catches every click and still composites its
+   backdrop-filter. This one is full screen, so without the visibility and
+   pointer-events rules below it silently swallows every interaction on the
+   page — scrolling keeps working, which makes it look like a freeze rather
+   than a hit-testing problem. `visibility` is delayed so the fade still runs. */
 .scrim {
   position: fixed;
   inset: 0;
   z-index: 90;
   background: color-mix(in srgb, var(--paper) 42%, transparent);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.6s, visibility 0s linear 0.6s;
+}
+.scrim[data-show='true'] {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
   backdrop-filter: blur(3px);
   -webkit-backdrop-filter: blur(3px);
-  opacity: 0;
-  transition: opacity 0.6s;
+  transition: opacity 0.6s, visibility 0s;
 }
-.scrim[data-show='true'] { opacity: 1; }
 
 .study {
   position: fixed;
@@ -656,16 +668,25 @@ a { color: inherit; }
   width: min(46rem, 100vw);
   z-index: 100;
   background: var(--card);
-  backdrop-filter: blur(30px) saturate(1.4);
-  -webkit-backdrop-filter: blur(30px) saturate(1.4);
   border-left: 1px solid var(--hair);
   box-shadow: -30px 0 90px -40px rgba(0, 0, 0, 0.5);
   overflow-y: auto;
   overscroll-behavior: contain;
   transform: translateX(100%);
-  transition: transform 0.85s cubic-bezier(0.16, 1, 0.3, 1);
+  /* Same reasoning as .scrim: a parked panel should cost nothing and catch
+     nothing. The blur is only attached while it is actually on screen. */
+  visibility: hidden;
+  pointer-events: none;
+  transition: transform 0.85s cubic-bezier(0.16, 1, 0.3, 1), visibility 0s linear 0.85s;
 }
-.study[data-show='true'] { transform: none; }
+.study[data-show='true'] {
+  transform: none;
+  visibility: visible;
+  pointer-events: auto;
+  backdrop-filter: blur(30px) saturate(1.4);
+  -webkit-backdrop-filter: blur(30px) saturate(1.4);
+  transition: transform 0.85s cubic-bezier(0.16, 1, 0.3, 1), visibility 0s;
+}
 .study__inner { padding: clamp(1.6rem, 4vw, 3.4rem); padding-top: 4.6rem; max-width: 40rem; }
 
 .study__close {
@@ -810,15 +831,22 @@ a { color: inherit; }
   inset: auto 0 0 0;
   z-index: 120;
   background: var(--card);
-  backdrop-filter: blur(26px);
-  -webkit-backdrop-filter: blur(26px);
   border-top: 1px solid var(--hair);
   border-radius: 18px 18px 0 0;
   padding: 1.2rem var(--gut) 2rem;
   transform: translateY(100%);
-  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  visibility: hidden;
+  pointer-events: none;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), visibility 0s linear 0.6s;
 }
-.sheet[data-show='true'] { transform: none; }
+.sheet[data-show='true'] {
+  transform: none;
+  visibility: visible;
+  pointer-events: auto;
+  backdrop-filter: blur(26px);
+  -webkit-backdrop-filter: blur(26px);
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), visibility 0s;
+}
 .sheet ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.1rem; }
 .sheet button {
   width: 100%;
