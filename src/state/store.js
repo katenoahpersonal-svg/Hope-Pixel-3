@@ -12,9 +12,14 @@ export const frame = {
   target: 0,
   /** Signed scroll velocity — drives easing and depth of field. */
   vel: 0,
-  /** Pointer, normalised -1..1, for the subtle camera orbit. */
+  /** Pointer, normalised -1..1, for the subtle camera parallax. */
   mx: 0,
   my: 0,
+  /** Where the visitor has turned their head, in radians. Drag to look. */
+  dragYaw: 0,
+  dragPitch: 0,
+  /** True while the pointer is held down on the room. */
+  dragging: false,
   /** Index into panelPlacement of the panel currently nearest the camera. */
   focus: -1,
   /** How strongly that panel is focused, 0..1. */

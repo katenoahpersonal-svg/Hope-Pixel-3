@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState } from 'react'
 import * as THREE from 'three'
 import { useFrame } from '@react-three/fiber'
-import { paintTexture, plateTexture, shadowBlob } from '../lib/textures'
+import { paintTexture, plateTexture, sharedShadowBlob } from '../lib/textures'
 import { studioWork, hallAt } from '../data/content'
 import { safeDt } from '../lib/math'
 
@@ -21,7 +21,7 @@ function Piece({ piece, spot, palette }) {
   const mat = useRef()
   const art = useMemo(() => paintTexture(piece, palette.accentInk), [piece, palette.accentInk])
   const plate = useMemo(() => plateTexture(piece.title, piece.meta, palette.dark ? '#ccd0ea' : '#33302a'), [piece, palette.dark])
-  const blob = useMemo(() => shadowBlob(256), [])
+  const blob = sharedShadowBlob()
 
   const { cx, hw } = hallAt(spot.z)
   const x = cx + spot.side * (hw - 0.06)

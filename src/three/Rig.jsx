@@ -56,6 +56,8 @@ export default function Rig({ quality }) {
 
   const look = useRef(new THREE.Vector3(0, EYE, -10))
   const pos = useRef(new THREE.Vector3(0, EYE, 14))
+  const yaw = useRef(0)
+  const pitch = useRef(0)
   const lastSection = useRef('')
 
   const openPanel = useMemo(() => {
@@ -131,9 +133,7 @@ export default function Rig({ quality }) {
       -3.7 * smoothWindow(z, -104, -118, 4) +
       // the side gallery: pan across the hung work
       Math.sin((z + 125) * 0.5) * 3.0 * smoothWindow(z, -125, -140, 3)
-    const lookX = ahead.cx + sweep + frame.mx * 1.5 * orbit
-    const lookY = EYE - 0.06 - frame.my * 0.75 * orbit
-    look.current.set(lookX, lookY, aheadZ)
+    look.current.set(ahead.cx + sweep, EYE - 0.06, aheadZ)
     if (leanTarget) {
       look.current.lerp(leanTarget, frame.focusAmount * (portrait ? 0.88 : 0.62))
     }
@@ -161,6 +161,23 @@ export default function Rig({ quality }) {
     }
     camera.position.lerp(pos.current, 1 - Math.exp(-14 * dt))
     camera.lookAt(look.current)
+
+    // --- turning your head ---------------------------------------------------
+    // A drag holds where you put it so you can actually read an engraving, and
+    // only recentres once you start walking again. Moving the pointer adds a
+    // gentler look on top, so the room responds even without dragging.
+    if (!frame.dragging) {
+      const recentre = Math.min(6, speed * 55)
+      frame.dragYaw = damp(frame.dragYaw, 0, recentre, dt)
+      frame.dragPitch = damp(frame.dragPitch, 0, recentre, dt)
+    }
+    const wantYaw = frame.dragYaw - frame.mx * 0.3 * orbit
+    const wantPitch = frame.dragPitch - frame.my * 0.13 * orbit
+    yaw.current = damp(yaw.current, wantYaw, 9, dt)
+    pitch.current = damp(pitch.current, wantPitch, 9, dt)
+    // Applied after lookAt so the walk still aims down the hall underneath.
+    camera.rotateY(yaw.current)
+    camera.rotateX(pitch.current)
 
     // --- tell the interface where we are ------------------------------------
     const id = sectionForZ(z)

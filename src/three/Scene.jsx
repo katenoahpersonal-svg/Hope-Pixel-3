@@ -166,7 +166,16 @@ function Ready() {
  * cannot hold it. Only ever downward — stepping back up trades a stutter for an
  * oscillation, which reads worse than simply running at the lower tier.
  */
-const STEP_DOWN = { high: 'mid', mid: 'low', low: null }
+/**
+ * Resolution steps it walks down through. Pixel ratio only — deliberately.
+ *
+ * This used to lower the quality TIER, which re-rendered the whole scene: the
+ * floor swapped material, the effect composer rebuilt its pass chain, shaders
+ * recompiled. Doing that mid-scroll on a struggling machine produces exactly
+ * the stutter-then-garbage it was supposed to prevent. Resolution is the
+ * biggest lever anyway and costs nothing to change.
+ */
+const DPR_STEPS = [1.25, 1, 0.85, 0.7]
 
 function PerfGuard() {
   const gl = useThree((s) => s.gl)
@@ -200,14 +209,16 @@ function PerfGuard() {
     if (a.slow < 2) return
     a.slow = 0
 
-    const { quality, setQuality } = useStore.getState()
-    const next = STEP_DOWN[quality]
-    if (!next) return
+    const current = gl.getPixelRatio()
+    const next = DPR_STEPS.find((step) => step < current - 0.01)
+    if (next === undefined) return
 
-    console.info(`[studio] ${Math.round(fps)}fps — stepping quality ${quality} → ${next}`)
-    setQuality(next)
-    gl.setPixelRatio(Math.min(gl.getPixelRatio(), next === 'mid' ? 1.25 : 1))
-    gl.shadowMap.enabled = false
+    console.info(`[studio] ${Math.round(fps)}fps — dropping resolution ${current.toFixed(2)} → ${next}`)
+    gl.setPixelRatio(next)
+    if (gl.shadowMap.enabled) {
+      gl.shadowMap.enabled = false
+      gl.shadowMap.needsUpdate = true
+    }
   })
 
   return null

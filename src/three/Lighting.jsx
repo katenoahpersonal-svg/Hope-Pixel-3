@@ -3,7 +3,7 @@ import * as THREE from 'three'
 import { useFrame, useThree } from '@react-three/fiber'
 import { Environment, Lightformer } from '@react-three/drei'
 import { panelLayout } from './Gallery'
-import { shaftGradient } from '../lib/textures'
+import { sharedShaftGradient } from '../lib/textures'
 import { hallAt } from '../data/content'
 
 /**
@@ -24,7 +24,7 @@ const tmp = new THREE.Vector3()
  * which looks like geometry instead of light.
  */
 function Windows({ palette }) {
-  const grad = useMemo(() => shaftGradient(), [])
+  const grad = sharedShaftGradient()
   const slots = [8, 12.5, 17]
   const strength = THREE.MathUtils.clamp(palette.sunIntensity / 2.7, 0.12, 1)
   return (

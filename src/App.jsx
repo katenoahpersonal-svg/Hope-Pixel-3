@@ -89,20 +89,55 @@ export default function App() {
     initScroll()
     const unbind = bindHistory()
 
+    /* Drag anywhere on the room to turn and look — at a panel on the wall, at
+       the engraving on a pedestal. Held, not sprung: it only recentres once you
+       start walking again (see the rig). Touch is excluded because a drag there
+       is how you scroll. */
+    let last = null
+
     const move = (e) => {
       frame.mx = (e.clientX / window.innerWidth) * 2 - 1
       frame.my = (e.clientY / window.innerHeight) * 2 - 1
+      if (!last) return
+      const clamp = (v, r) => Math.max(-r, Math.min(r, v))
+      frame.dragYaw = clamp(frame.dragYaw - (e.clientX - last.x) * 0.0026, 1.15)
+      frame.dragPitch = clamp(frame.dragPitch - (e.clientY - last.y) * 0.0018, 0.42)
+      last = { x: e.clientX, y: e.clientY }
     }
+
+    const down = (e) => {
+      if (e.button !== 0 || e.pointerType === 'touch') return
+      // Only the room turns; the interface and the case study keep their clicks.
+      if (e.target instanceof Element && e.target.closest('.chrome, .study, .scrim')) return
+      last = { x: e.clientX, y: e.clientY }
+      frame.dragging = true
+      document.body.classList.add('is-turning')
+    }
+
+    const up = () => {
+      last = null
+      frame.dragging = false
+      document.body.classList.remove('is-turning')
+    }
+
     const leave = () => {
       frame.mx = 0
       frame.my = 0
+      up()
     }
+
     window.addEventListener('pointermove', move, { passive: true })
+    window.addEventListener('pointerdown', down)
+    window.addEventListener('pointerup', up)
+    window.addEventListener('pointercancel', up)
     window.addEventListener('pointerleave', leave)
 
     return () => {
       unbind()
       window.removeEventListener('pointermove', move)
+      window.removeEventListener('pointerdown', down)
+      window.removeEventListener('pointerup', up)
+      window.removeEventListener('pointercancel', up)
       window.removeEventListener('pointerleave', leave)
     }
   }, [flat])

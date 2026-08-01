@@ -131,6 +131,25 @@ export function grainMap(size = 512, contrast = 0.16, cell = 2) {
   return finish(c, { srgb: false, repeat: [1, 1], aniso: 4 })
 }
 
+/**
+ * Shared surface maps.
+ *
+ * These are identical wherever they are used, so they are built once and handed
+ * out. Creating them per component meant sixteen copies of the brushed metal
+ * and nineteen of the shadow blob — thirty-five redundant textures, each with a
+ * full mipmap chain, sitting in GPU memory on hardware that shares it with the
+ * system.
+ */
+const shared = new Map()
+const once = (key, make) => {
+  if (!shared.has(key)) shared.set(key, make())
+  return shared.get(key)
+}
+
+export const sharedBrushedMetal = () => once('metal', () => brushedMetalMap(512))
+export const sharedShadowBlob = () => once('blob', () => shadowBlob(256))
+export const sharedShaftGradient = () => once('shaft', () => shaftGradient())
+
 /** Anisotropic streaks — brushed aluminium for the panel frames. */
 export function brushedMetalMap(size = 512) {
   const c = canvas(size, size)
@@ -1002,31 +1021,47 @@ export function contactTexture(identity, accent = '#b9793f') {
 
 /** A pedestal's engraved face: the discipline and what it covers. */
 export function pedestalTexture(item, accent = '#b9793f') {
-  const c = canvas(512, 512)
+  // Drawn at 1024 so the engraving survives being read from a metre away.
+  const S = 1024
+  const M = 40
+  const W = S - M * 2
+  const c = canvas(S, S)
   const ctx = c.getContext('2d')
-  ctx.clearRect(0, 0, 512, 512)
-  ctx.fillStyle = accent
-  ctx.font = `400 22px ${TEXT}`
+  ctx.clearRect(0, 0, S, S)
   ctx.textBaseline = 'alphabetic'
-  tracked(ctx, 'EXPERTISE', 0, 40, 5)
-  ctx.fillStyle = '#2a2721'
-  const { lines, size } = wrapFit(ctx, item.title, 500, 72, 2)
+
+  ctx.fillStyle = accent
+  ctx.font = `500 34px ${TEXT}`
+  tracked(ctx, 'EXPERTISE', M, 92, 8)
+
+  ctx.fillStyle = '#221f1a'
+  const { lines, size } = wrapFit(ctx, item.title, W, 118, 2)
   lines.forEach((l, i) => {
     ctx.font = `${size}px ${DISPLAY}`
-    ctx.fillText(l, 0, 120 + i * size * 1.05)
+    ctx.fillText(l, M, 216 + i * size * 1.02)
   })
-  ctx.strokeStyle = 'rgba(0,0,0,0.18)'
-  ctx.lineWidth = 2
+
+  ctx.strokeStyle = accent
+  ctx.lineWidth = 3
   ctx.beginPath()
-  ctx.moveTo(0, 250)
-  ctx.lineTo(500, 250)
+  ctx.moveTo(M, 400)
+  ctx.lineTo(M + 180, 400)
   ctx.stroke()
-  ctx.fillStyle = '#6f685c'
-  ctx.font = `400 24px ${TEXT}`
-  const words = wrapFit(ctx, item.blurb, 500, 26, 5, TEXT)
-  words.lines.forEach((l, i) => {
-    ctx.font = `400 ${words.size}px ${TEXT}`
-    ctx.fillText(l, 0, 296 + i * words.size * 1.45)
+
+  ctx.fillStyle = '#4f4a41'
+  const body = wrapFit(ctx, item.blurb, W, 42, 6, TEXT)
+  body.lines.forEach((l, i) => {
+    ctx.font = `400 ${body.size}px ${TEXT}`
+    ctx.fillText(l, M, 476 + i * body.size * 1.5)
   })
+
+  // The tools themselves, set small underneath.
+  ctx.fillStyle = '#8b8478'
+  const tools = wrapFit(ctx, item.items.join('  ·  '), W, 30, 4, TEXT)
+  tools.lines.forEach((l, i) => {
+    ctx.font = `400 ${tools.size}px ${TEXT}`
+    ctx.fillText(l, M, 812 + i * tools.size * 1.5)
+  })
+
   return finish(c)
 }

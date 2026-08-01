@@ -7,7 +7,7 @@ import {
   labelTexture,
   documentTexture,
   contactTexture,
-  brushedMetalMap,
+  sharedBrushedMetal,
 } from '../lib/textures'
 import { identity, about, resume, studioWork, hallAt, CHAPTER_Z, CONTACT_Z } from '../data/content'
 import { frame } from '../state/store'
@@ -95,7 +95,7 @@ function ResumeSheet({ palette, onDownload }) {
   const inner = useRef()
   const mat = useRef()
   const tex = useMemo(() => documentTexture(resume, identity, palette.accentInk), [palette.accentInk])
-  const metal = useMemo(() => brushedMetalMap(512), [])
+  const metal = sharedBrushedMetal()
   const spot = useMemo(() => wallSpot(-99, 1, 0.1), [])
 
   useFrame((_, delta) => {

@@ -2,7 +2,7 @@ import { useMemo, useRef, useState } from 'react'
 import * as THREE from 'three'
 import { useFrame, useThree } from '@react-three/fiber'
 import { RoundedBox } from '@react-three/drei'
-import { panelArtTexture, brushedMetalMap, shadowBlob } from '../lib/textures'
+import { panelArtTexture, sharedBrushedMetal, sharedShadowBlob } from '../lib/textures'
 import { frame, useStore } from '../state/store'
 import { safeDt } from '../lib/math'
 
@@ -44,8 +44,8 @@ export default function Panel({
   const open = useStore((s) => s.open)
 
   const art = useMemo(() => panelArtTexture(project, palette.accentInk), [project, palette.accentInk])
-  const metal = useMemo(() => brushedMetalMap(512), [])
-  const blob = useMemo(() => shadowBlob(256), [])
+  const metal = sharedBrushedMetal()
+  const blob = sharedShadowBlob()
 
   const w = BASE_W * scale
   const h = BASE_H * scale

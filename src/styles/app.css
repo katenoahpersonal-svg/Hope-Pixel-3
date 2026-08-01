@@ -197,7 +197,8 @@ a { color: inherit; }
   inset: 0;
   z-index: 0;
 }
-.stage canvas { display: block; touch-action: pan-y; }
+.stage canvas { display: block; touch-action: pan-y; cursor: grab; }
+body.is-turning .stage canvas { cursor: grabbing; }
 
 .spacer { position: relative; z-index: 1; pointer-events: none; }
 
@@ -576,7 +577,7 @@ a { color: inherit; }
   top: 50%;
   transform: translateY(-50%);
   width: min(27rem, 42vw);
-  max-height: 74vh;
+  max-height: min(78vh, 46rem);
   padding: 1.6rem 1.7rem;
   border-radius: 16px;
   background: var(--card);
@@ -584,8 +585,19 @@ a { color: inherit; }
   backdrop-filter: blur(22px) saturate(1.35);
   -webkit-backdrop-filter: blur(22px) saturate(1.35);
   box-shadow: var(--shadow);
-  overflow: hidden;
+  /* Scrollable, not clipped. With `hidden` the contact form lost its Send
+     button and every link below it, and Expertise lost two of six cards. */
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--accent) 55%, transparent) transparent;
   z-index: 15;
+}
+.column::-webkit-scrollbar { width: 6px; }
+.column::-webkit-scrollbar-track { background: transparent; }
+.column::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--accent) 45%, transparent);
+  border-radius: 999px;
 }
 .column--left { right: auto; left: var(--gut); }
 .column h2 { font-size: clamp(1.6rem, 2.4vw, 2.1rem); margin-bottom: 0.6rem; }

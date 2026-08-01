@@ -2,7 +2,7 @@ import { useMemo, useRef, useState } from 'react'
 import * as THREE from 'three'
 import { useFrame } from '@react-three/fiber'
 import { RoundedBox } from '@react-three/drei'
-import { pedestalTexture, brushedMetalMap, shadowBlob } from '../lib/textures'
+import { pedestalTexture, sharedBrushedMetal, sharedShadowBlob } from '../lib/textures'
 import { expertise, hallAt } from '../data/content'
 import { safeDt } from '../lib/math'
 
@@ -110,8 +110,8 @@ function Pedestal({ item, spot, palette }) {
   const [hovered, setHovered] = useState(false)
   const hv = useRef(0)
   const glow = useRef()
-  const metal = useMemo(() => brushedMetalMap(512), [])
-  const blob = useMemo(() => shadowBlob(256), [])
+  const metal = sharedBrushedMetal()
+  const blob = sharedShadowBlob()
   const plate = useMemo(() => pedestalTexture(item, palette.accentInk), [item, palette.accentInk])
 
   const { cx } = hallAt(spot.z)
@@ -159,9 +159,9 @@ function Pedestal({ item, spot, palette }) {
         <Specimen kind={item.material} metal={metal} hover={hovered ? 1 : 0} />
       </group>
 
-      {/* engraved face */}
-      <mesh position={[0, H * 0.55, 0.426]} raycast={() => null}>
-        <planeGeometry args={[0.72, 0.72]} />
+      {/* engraved face — sized to be read from the walkway, not just seen */}
+      <mesh position={[0, H * 0.52, 0.426]} raycast={() => null}>
+        <planeGeometry args={[0.78, 0.78]} />
         <meshStandardMaterial map={plate} transparent roughness={0.9} depthWrite={false} />
       </mesh>
 
