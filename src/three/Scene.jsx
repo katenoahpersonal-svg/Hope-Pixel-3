@@ -149,8 +149,8 @@ function PerfGuard() {
 
     console.info(`[studio] ${Math.round(fps)}fps — stepping quality ${quality} → ${next}`)
     setQuality(next)
-    gl.setPixelRatio(Math.min(gl.getPixelRatio(), next === 'mid' ? 1.35 : 1))
-    if (next !== 'high') gl.shadowMap.enabled = false
+    gl.setPixelRatio(Math.min(gl.getPixelRatio(), next === 'mid' ? 1.25 : 1))
+    gl.shadowMap.enabled = false
   })
 
   return null

@@ -5,7 +5,7 @@ import { panelLayout } from './Gallery'
 import { frame, useStore } from '../state/store'
 import { hallAt, tToZ, sections } from '../data/content'
 import { safeDt, finite } from '../lib/math'
-import { scrollProgress } from '../lib/scroll'
+import { scrollProgress, isLocked } from '../lib/scroll'
 
 /**
  * The visitor's body in the space. Scroll walks it down the hall, the pointer
@@ -82,10 +82,11 @@ export default function Rig({ quality }) {
     frame.my = finite(frame.my)
     frame.focusAmount = finite(frame.focusAmount)
 
-    // Sample the scroll position every frame rather than waiting for events —
-    // events fire on their own schedule (and not at all in a background tab),
-    // and the camera should always know where the page really is.
-    const target = scrollProgress()
+    // Sample the document's scroll position every frame rather than waiting for
+    // events — events fire on their own schedule (and not at all in a
+    // background tab), and the camera should always know where the page really
+    // is. While a case study is open the position is held instead.
+    const target = isLocked() ? frame.target : scrollProgress()
     frame.vel = target - frame.target
     frame.target = target
 

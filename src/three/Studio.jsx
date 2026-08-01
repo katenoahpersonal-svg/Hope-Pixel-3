@@ -13,7 +13,9 @@ export default function Studio({ onCreated }) {
 
   return (
     <Stage
-      dpr={[1, quality === 'high' ? 1.75 : quality === 'mid' ? 1.35 : 1]}
+      // This scene is fill-rate bound, so pixel count is the single biggest
+      // lever there is. 1.5 on a 1280-wide window is already 2.6 megapixels.
+      dpr={[1, quality === 'high' ? 1.5 : quality === 'mid' ? 1.25 : 1]}
       shadows={quality === 'high'}
       frameloop={drive ? 'never' : 'always'}
       gl={{

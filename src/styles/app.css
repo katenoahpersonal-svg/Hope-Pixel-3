@@ -210,8 +210,14 @@ a { color: inherit; }
   inset: 0;
   z-index: 10;
   pointer-events: none;
+  /* Dragging to scroll otherwise smears a selection across every caption on
+     screen. Long-form copy stays selectable — see .study below. */
+  user-select: none;
+  -webkit-user-select: none;
 }
 .chrome > * { pointer-events: auto; }
+
+.study, .study * { user-select: text; -webkit-user-select: text; }
 
 .nav {
   position: fixed;

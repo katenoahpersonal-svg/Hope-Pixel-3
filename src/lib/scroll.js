@@ -1,83 +1,80 @@
-import Lenis from 'lenis'
-import gsap from 'gsap'
 import { frame, SCROLL_SCREENS } from '../state/store'
 
-let lenis = null
+/**
+ * Scroll plumbing.
+ *
+ * There is no smooth-scroll library here on purpose. Every visible element is
+ * `position: fixed`, so the only thing the page scroll drives is the camera —
+ * and the camera already eases toward its target with a frame-rate-correct
+ * damp. Layering a scroll-smoothing library on top of that bought nothing
+ * visually, added a second lag that compounded when frames got scarce, and made
+ * the scene depend on that library's internal idea of where the page was. When
+ * that internal value disagreed with the real one, the scrollbar moved and the
+ * camera did not.
+ *
+ * The document's own scroll position is the single source of truth.
+ */
+
 let locked = false
+let lockedAt = 0
 
 export function maxScroll() {
   return Math.max(1, document.documentElement.scrollHeight - window.innerHeight)
 }
 
-export function initScroll() {
-  if (lenis) return lenis
-
-  lenis = new Lenis({
-    duration: 1.15,
-    easing: (t) => 1 - Math.pow(1 - t, 3),
-    smoothWheel: true,
-    syncTouch: false,
-    touchMultiplier: 1.4,
-    wheelMultiplier: 0.9,
-  })
-
-  // One ticker for the page. R3F runs its own loop for the scene.
-  gsap.ticker.add((time) => lenis.raf(time * 1000))
-  gsap.ticker.lagSmoothing(0)
-
-  return lenis
+export function scrollY() {
+  return window.scrollY ?? document.documentElement.scrollTop ?? 0
 }
 
-/**
- * Where the visitor has actually scrolled to, 0..1 — sampled, not listened for.
- *
- * This reads Lenis's TARGET rather than its animated position on purpose. The
- * camera does its own frame-rate-correct easing, so taking Lenis's smoothed
- * value too would stack two lags on top of each other; when frames get scarce
- * both slow down together and the whole thing feels stuck. One layer of easing,
- * fed by the raw scroll position, stays responsive at any frame rate.
- */
+/** Where the visitor has scrolled to, 0..1. Sampled every frame by the rig. */
 export function scrollProgress() {
-  const y = lenis ? lenis.targetScroll : window.scrollY
-  const t = y / maxScroll()
+  const t = scrollY() / maxScroll()
   return Number.isFinite(t) ? Math.min(1, Math.max(0, t)) : 0
+}
+
+export function initScroll() {
+  // Nothing to start. Kept as the one place that would set scroll up if it ever
+  // needs to again.
+  frame.target = scrollProgress()
+  frame.t = frame.target
+  return null
 }
 
 export function scrollHeightPx() {
   return `${SCROLL_SCREENS * 100}vh`
 }
 
-/** Jump (or glide) to a progress value 0..1. */
-export function scrollToT(t, { immediate = false, duration = 1.9 } = {}) {
-  const y = Math.max(0, Math.min(1, t)) * maxScroll()
-  if (!lenis) {
-    window.scrollTo({ top: y, behavior: immediate ? 'auto' : 'smooth' })
-    return
-  }
-  lenis.scrollTo(y, { immediate, duration, easing: (x) => 1 - Math.pow(1 - x, 4), force: true })
+/** Glide (or jump) to a progress value 0..1. */
+export function scrollToT(t, { immediate = false } = {}) {
+  const top = Math.max(0, Math.min(1, t)) * maxScroll()
+  window.scrollTo({ top, behavior: immediate ? 'auto' : 'smooth' })
 }
 
-/** Freeze the page while a case study is open, with or without smooth scroll. */
+/**
+ * Hold the camera still while a case study is open.
+ *
+ * Deliberately does NOT touch `overflow` or pin the body: nothing on this page
+ * scrolls visibly, so hiding the scrollbar would only reflow every fixed
+ * element sideways by its width. Instead the rig stops sampling scroll while
+ * locked, and the position is restored on release so closing a study puts you
+ * back exactly where you were standing.
+ */
 export function lockScroll(on) {
   if (locked === on) return
   locked = on
-  if (lenis) on ? lenis.stop() : lenis.start()
-  else document.body.style.overflow = on ? 'hidden' : ''
+  if (on) lockedAt = scrollY()
+  else window.scrollTo({ top: lockedAt, behavior: 'auto' })
 }
 
 export function isLocked() {
   return locked
 }
 
-/** Test hook: set progress directly when there is no RAF to rely on. */
+/** Test hook: set progress directly. */
 if (typeof window !== 'undefined') {
   window.__seek = (t) => {
     const at = Math.max(0, Math.min(1, t))
-    if (lenis) lenis.scrollTo(at * maxScroll(), { immediate: true, force: true })
-    else window.scrollTo(0, at * maxScroll())
-    // Assert after the scroll, not before: Lenis emits synchronously and would
-    // otherwise overwrite this with a stale position when no rAF is running to
-    // finish its animation.
+    window.scrollTo({ top: at * maxScroll(), behavior: 'auto' })
     frame.target = at
     frame.t = at
   }
