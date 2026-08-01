@@ -55,9 +55,16 @@ That file holds:
 
 ## How it is built
 
-- **React Three Fiber + drei** for the scene, **GSAP + Lenis** for scroll,
-  **@react-three/postprocessing** for bloom, depth of field and vignette,
-  **zustand** for state.
+- **React Three Fiber + drei** for the scene, **@react-three/postprocessing**
+  for bloom, depth of field and vignette, **zustand** for state, **GSAP** for
+  the magnetic buttons.
+- **No smooth-scroll library.** Every visible element is `position: fixed`, so
+  the only thing page scroll drives is the camera — which already eases toward
+  its target with a frame-rate-correct damp. A scroll-smoothing library on top
+  of that added a second lag that compounded when frames got scarce, and made
+  the scene depend on the library's internal idea of where the page was. When
+  that disagreed with reality the scrollbar moved and the camera did not.
+  `scrollProgress()` reads `window.scrollY`, full stop.
 - **No asset downloads.** Every surface, artwork, label and résumé sheet is
   drawn into a 2D canvas at runtime (`src/lib/textures.js`) and uploaded as a
   texture. No HDRI, no GLTF, no image files — which is why it loads instantly
