@@ -316,9 +316,10 @@ function Contact({ show }) {
 function Studio({ show }) {
   return (
     <div className="column panelfade" data-show={show}>
-      <span className="eyebrow">Side gallery</span>
+      <span className="eyebrow">Side gallery · you have arrived</span>
       <h2>Studio Work</h2>
       <p>{studioWork.intro}</p>
+      <p className="meta" style={{ color: 'var(--accent)' }}>{studioWork.hint}</p>
       <hr className="hair" />
       <div className="kv">
         {studioWork.pieces.map((p) => (

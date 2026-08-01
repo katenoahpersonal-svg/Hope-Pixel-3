@@ -130,9 +130,8 @@ export default function Rig({ quality }) {
       // the alcove: the head turns to take in the pedestals on either side
       Math.sin((z + 76) * 0.42) * 3.4 * smoothWindow(z, -76, -94, 3) +
       // the quiet room: turn toward the closing statement rather than the bend
-      -3.7 * smoothWindow(z, -104, -118, 4) +
-      // the side gallery: pan across the hung work
-      Math.sin((z + 125) * 0.5) * 3.0 * smoothWindow(z, -125, -140, 3)
+      -3.7 * smoothWindow(z, -104, -118, 4)
+    // No sweep in the side gallery: you arrive there and look around yourself.
     look.current.set(ahead.cx + sweep, EYE - 0.06, aheadZ)
     if (leanTarget) {
       look.current.lerp(leanTarget, frame.focusAmount * (portrait ? 0.88 : 0.62))

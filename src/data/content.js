@@ -39,7 +39,19 @@ export const identity = {
 /* ------------------------------------------------------------------ */
 
 export const Z_START = 14
-export const Z_END = -134
+/**
+ * The walk ends here — in the middle of the side gallery, not at the far wall.
+ * Scrolling past the end would only push you into a corner; instead you arrive,
+ * the camera settles, and turning your head becomes the way you see the room.
+ */
+export const Z_END = -130
+
+/**
+ * The far wall, and how far the geometry runs past the end of the walk. The
+ * hall builder and the side gallery both read this, so the last canvas is
+ * guaranteed to hang on an actual wall rather than float in front of one.
+ */
+export const Z_FAR = Z_END - 8
 
 export const hallProfile = [
   //  z     cx    hw    h
@@ -59,8 +71,8 @@ export const hallProfile = [
   [-106,   0,   9.2,  6.8], // contact — the quiet room
   [-115,   0,   9.2,  6.8],
   [-121,   6,   7.2,  6.2], // the hall bends
-  [-127,  13,   4.7,  5.4], // studio work, the side gallery
-  [-158,  13,   4.7,  5.4],
+  [-124,  13,   4.9,  6.4], // studio work — a room to stand in, not a passage
+  [-152,  13,   4.9,  6.4],
 ]
 
 /** Sample the hall profile at depth z. */
@@ -705,12 +717,17 @@ export const resume = {
 export const studioWork = {
   intro:
     'A side room for the work that pays in a different currency — painting and personal image-making. Kept deliberately separate from the commercial gallery.',
-  note: 'Placeholder plates. Replace the entries in content.js with real photographs of the work.', // VERIFY — swap for real art
+  hint: 'Drag anywhere to turn and look around the room.',
+  note: 'Placeholder plates. Replace the entries below with real photographs of the work.', // VERIFY — swap for real art
+  /**
+   * Three, hung large. `wall` places each one: 'end' faces you as you arrive,
+   * 'left' and 'right' need you to turn your head. Add a fourth and it lands on
+   * the end wall beside the first — better to swap one out.
+   */
   pieces: [
-    { id: 'sw1', title: 'Study in Warm Light', meta: 'Acrylic on panel', art: { kind: 'paint', seed: 21 } },
-    { id: 'sw2', title: 'Field Notes', meta: 'Mixed media', art: { kind: 'paint', seed: 34 } },
-    { id: 'sw3', title: 'Quiet Hour', meta: 'Oil on canvas', art: { kind: 'paint', seed: 55 } },
-    { id: 'sw4', title: 'Interior, Morning', meta: 'Gouache', art: { kind: 'paint', seed: 89 } },
+    { id: 'sw1', title: 'Quiet Hour', meta: 'Oil on canvas · 120 × 150cm', wall: 'end', art: { kind: 'paint', seed: 55 } },
+    { id: 'sw2', title: 'Study in Warm Light', meta: 'Acrylic on panel · 90 × 110cm', wall: 'left', art: { kind: 'paint', seed: 21 } },
+    { id: 'sw3', title: 'Interior, Morning', meta: 'Gouache · 70 × 90cm', wall: 'right', art: { kind: 'paint', seed: 89 } },
   ],
 }
 

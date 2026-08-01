@@ -828,13 +828,15 @@ export function paintTexture(piece, accent = '#b9793f') {
   const ctx = c.getContext('2d')
   const r = rng(piece.art?.seed ?? 1)
 
-  ctx.fillStyle = '#efe9de'
+  // A mid-toned ground, not near-white: hung under a picture light, a pale
+  // canvas blows out to a rectangle of glare and stops reading as a painting.
+  ctx.fillStyle = '#d8ccba'
   ctx.fillRect(0, 0, W, H)
 
-  const tones = ['#c8b49a', '#9aa79a', accent, '#7f6a58', '#dfd3bd', '#5c6b74']
+  const tones = ['#a8886a', '#6f7f74', accent, '#5b4636', '#c9b89c', '#3f4e5c']
   ctx.globalCompositeOperation = 'multiply'
-  for (let i = 0; i < 22; i++) {
-    ctx.globalAlpha = 0.1 + r() * 0.22
+  for (let i = 0; i < 26; i++) {
+    ctx.globalAlpha = 0.12 + r() * 0.28
     ctx.fillStyle = tones[(r() * tones.length) | 0]
     ctx.beginPath()
     const cx = r() * W
