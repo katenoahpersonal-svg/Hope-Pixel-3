@@ -17,6 +17,62 @@ import { downloadResume } from '../lib/download'
  * react-three-fiber root tears the scene down and rebuilds it.
  */
 
+const DRIVE = new URLSearchParams(window.location.search).has('drive')
+
+/**
+ * Our own render loop, rather than react-three-fiber's.
+ *
+ * The scene lives on a hand-made root (see Stage.jsx), and whether R3F starts
+ * its internal animation loop for one of those was an implementation detail we
+ * were quietly relying on. If it does not start, the canvas paints one frame
+ * and freezes: the page still scrolls, the camera never moves, and nothing
+ * reacts — which is indistinguishable from the site hanging.
+ *
+ * Driving `advance()` from a loop we own settles the question, and makes the
+ * shipped build take the exact code path that ?drive has been exercising all
+ * along. The watchdog restarts it if it ever stops, so a lost WebGL context or
+ * a throw inside a frame callback cannot end the session.
+ */
+function Frameloop() {
+  const advance = useThree((s) => s.advance)
+
+  useEffect(() => {
+    if (DRIVE) return
+    let raf = 0
+    let alive = true
+    let beat = 0
+
+    const tick = (t) => {
+      if (!alive) return
+      // Queue the next frame FIRST, so a throw inside advance() cannot break
+      // the chain and strand the scene.
+      raf = requestAnimationFrame(tick)
+      beat++
+      window.__frames = beat
+      advance(t)
+    }
+    raf = requestAnimationFrame(tick)
+
+    let seen = -1
+    const watchdog = setInterval(() => {
+      if (document.hidden) return
+      if (beat === seen) {
+        cancelAnimationFrame(raf)
+        raf = requestAnimationFrame(tick)
+      }
+      seen = beat
+    }, 2000)
+
+    return () => {
+      alive = false
+      cancelAnimationFrame(raf)
+      clearInterval(watchdog)
+    }
+  }, [advance])
+
+  return null
+}
+
 const TEXTURE_SLOTS = [
   'map',
   'emissiveMap',
@@ -137,6 +193,7 @@ function PerfGuard() {
     if (a.elapsed < 1) return
 
     const fps = a.frames / a.elapsed
+    window.__fps = Math.round(fps)
     a.elapsed = 0
     a.frames = 0
     a.slow = fps < 45 ? a.slow + 1 : 0
@@ -174,6 +231,7 @@ export default function Scene() {
 
       <Rig quality={quality} />
       <Effects palette={palette} quality={quality} />
+      <Frameloop />
       <PerfGuard />
       <Ready />
     </>

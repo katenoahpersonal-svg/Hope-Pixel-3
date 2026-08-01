@@ -20,6 +20,8 @@ import useFrameValue from './useFrameValue'
 import Magnetic from './Magnetic'
 import { resumeUrl } from '../lib/download'
 
+const DEBUG = new URLSearchParams(window.location.search).has('debug')
+
 /* --------------------------------------------------------- depth rail */
 
 export function DepthRail() {
@@ -335,6 +337,25 @@ function Studio({ show }) {
 
 /* ------------------------------------------------------------ assembled */
 
+/**
+ * `?debug` — a live readout of what the scene is actually doing. Frames should
+ * be climbing and fps should be a real number; if frames is stuck the render
+ * loop has stopped, which is a different problem from a slow one.
+ */
+function Debug() {
+  const stats = useFrameValue(
+    () => `${window.__frames || 0}f · ${window.__fps ?? '–'}fps · z${Math.round(frame.camZ)} · ${useStore.getState().quality}`,
+    '',
+    DEBUG
+  )
+  if (!DEBUG) return null
+  return (
+    <div className="debug" role="status">
+      {stats}
+    </div>
+  )
+}
+
 export default function Overlays() {
   const section = useStore((s) => s.section)
   const open = useStore((s) => s.open)
@@ -342,6 +363,7 @@ export default function Overlays() {
 
   return (
     <>
+      <Debug />
       <Home show={section === 'home' && !hidden} />
       <Work show={section === 'work' && !hidden} />
       <About show={section === 'about' && !hidden} />

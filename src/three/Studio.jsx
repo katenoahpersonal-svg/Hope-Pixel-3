@@ -2,8 +2,6 @@ import Stage from './Stage'
 import Scene from './Scene'
 import { useStore } from '../state/store'
 
-const drive = new URLSearchParams(window.location.search).has('drive')
-
 /**
  * The whole 3D gallery behind one lazy import, so a visitor on the flat layout
  * — reduced motion, or no WebGL — never downloads three.js at all.
@@ -17,7 +15,11 @@ export default function Studio({ onCreated }) {
       // lever there is. 1.5 on a 1280-wide window is already 2.6 megapixels.
       dpr={[1, quality === 'high' ? 1.5 : quality === 'mid' ? 1.25 : 1]}
       shadows={quality === 'high'}
-      frameloop={drive ? 'never' : 'always'}
+      // Always 'never': the Frameloop component in Scene.jsx drives advance()
+      // itself. Leaving R3F to run its own loop on a hand-mounted root is the
+      // one thing a hidden preview pane can never verify, because it issues no
+      // animation frames at all.
+      frameloop="never"
       gl={{
         antialias: false,
         alpha: false,
