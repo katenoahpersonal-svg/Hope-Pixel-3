@@ -176,6 +176,9 @@ function Pedestal({ item, spot, palette }) {
           blending={THREE.AdditiveBlending}
           depthWrite={false}
           toneMapped={false}
+          polygonOffset
+          polygonOffsetFactor={-4}
+          polygonOffsetUnits={-4}
         />
       </mesh>
     </group>

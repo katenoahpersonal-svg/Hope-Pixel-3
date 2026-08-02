@@ -137,8 +137,10 @@ export default function Rig({ quality }) {
     const sweep =
       // the alcove: the head turns to take in the pedestals on either side
       Math.sin((z + 76) * 0.42) * 3.4 * smoothWindow(z, -76, -94, 3) +
-      // the quiet room: turn toward the closing statement rather than the bend
-      -3.7 * smoothWindow(z, -104, -118, 4)
+      // The quiet room: turn toward the closing statement on the approach, then
+      // release well before reaching it, so the walk ends facing the way out
+      // rather than nose-first into the back of a wall.
+      -3.2 * smoothWindow(z, -102, -112, 3)
     // No sweep in the side gallery: you arrive there and look around yourself.
     look.current.set(ahead.cx + sweep, EYE - 0.06, aheadZ)
     if (leanTarget) {

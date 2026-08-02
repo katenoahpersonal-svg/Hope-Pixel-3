@@ -261,7 +261,10 @@ export default function Hall({ palette, quality }) {
         )}
       </mesh>
 
-      {/* a soft wash of grime the reflective floor cannot bake in for itself */}
+      {/* A soft wash of grime the reflective floor cannot bake in for itself.
+          It sits two millimetres above the floor, which no depth buffer can
+          resolve at the far end of a 150m hall — polygonOffset biases it so it
+          always wins, instead of trading places with the floor and flickering. */}
       <mesh geometry={geo.floorAO} renderOrder={1} raycast={() => null}>
         <meshBasicMaterial
           color="#000000"
@@ -269,6 +272,9 @@ export default function Hall({ palette, quality }) {
           opacity={reflective ? 0.1 : 0.07}
           depthWrite={false}
           alphaMap={grain}
+          polygonOffset
+          polygonOffsetFactor={-4}
+          polygonOffsetUnits={-4}
         />
       </mesh>
 

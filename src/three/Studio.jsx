@@ -26,7 +26,12 @@ export default function Studio({ onCreated }) {
         powerPreference: 'high-performance',
         stencil: false,
       }}
-      camera={{ fov: 48, near: 0.1, far: 220, position: [0, 1.62, 14] }}
+      /* near 0.35, not 0.1. Depth precision is dominated by the near plane, and
+         this hall is 150m long — at 0.1 the buffer cannot separate a decal two
+         millimetres above the floor from the floor itself, and the two flicker
+         against each other down the whole room. Nothing ever gets closer to the
+         eye than about a metre here, so the near plane can afford to move out. */
+      camera={{ fov: 48, near: 0.35, far: 200, position: [0, 1.62, 14] }}
       onCreated={onCreated}
     >
       <Scene />

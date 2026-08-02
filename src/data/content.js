@@ -558,8 +558,15 @@ export const featured = { id: 'bigcommerce', z: 0.5, x: 3.6, rotY: -0.38, scale:
 /** Depths of the four standing chapter markers, shared by the scene and the overlay. */
 export const CHAPTER_Z = [-59.5, -64, -68.5, -73]
 
-/** Where the closing statement wall stands in the quiet room. */
-export const CONTACT_Z = -114.5
+/**
+ * Where the closing statement wall stands in the quiet room.
+ *
+ * Set back from the walking line and met earlier. Standing closer to the path
+ * meant the camera slid along the BACK of a five-metre slab with nothing else
+ * in view — no sense of movement at all, and the lettered face never properly
+ * seen.
+ */
+export const CONTACT_Z = -111.5
 
 export const about = {
   title: 'About',

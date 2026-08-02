@@ -158,7 +158,7 @@ function ContactPlate({ palette }) {
   const mat = useRef()
   const tex = useMemo(() => contactTexture(identity, palette.accentInk), [palette.accentInk])
   const { cx } = hallAt(CONTACT_Z)
-  const x = cx - 3.4
+  const x = cx - 5.2
 
   useFrame((state) => {
     if (!mat.current) return
