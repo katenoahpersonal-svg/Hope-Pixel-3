@@ -1,44 +1,44 @@
-import { Color } from 'three'
+﻿import { Color } from 'three'
 
 /**
  * DIMENSION TWO — TIME.
  *
- * The studio is always after hours: deep midnight blues and violets. The clock
- * still moves through it — four anchors blended continuously, so 4:40pm is
- * genuinely between two of them — but the room never goes bright. What changes
- * is the temperature and how much light is in the air.
+ * The studio is warm brick and lamplight throughout, always after hours. The
+ * clock still moves through it — four anchors blended continuously, so 4:40pm
+ * is genuinely between two of them — but the room never goes bright or cold.
+ * What changes is the temperature and how much light is in the air.
  *
  * `accentInk` is the accent used inside canvas artwork and is deliberately
  * IDENTICAL in every phase. Those textures are memoised on it, and a value that
  * drifted with the clock would silently redraw every panel in the building once
  * a minute.
  */
-const ACCENT_INK = '#5b4bc4'
+const ACCENT_INK = '#a8562a'
 /** Lettering applied to the walls, and its accent. Also phase-invariant. */
-const SIGN_INK = '#d3d0ea'
-const SIGN_ACCENT = '#a794ff'
+const SIGN_INK = '#efdcc6'
+const SIGN_ACCENT = '#f0a866'
 
 export const PHASES = [
   {
-    id: 'smallhours',
-    label: 'Small hours',
+    id: 'embers',
+    label: 'Embers',
     hour: 2,
-    bg: '#06070f',
-    fog: '#070810',
+    bg: '#0b0705',
+    fog: '#0c0806',
     fogNear: 13,
     fogFar: 62,
-    sun: '#5d6ea8',
-    sunIntensity: 0.28,
+    sun: '#a06a42',
+    sunIntensity: 0.32,
     sunElevation: 0.55,
-    sky: '#171d3a',
-    ground: '#050610',
-    ambient: 0.15,
-    env: 0.21,
-    cove: '#c8d4ff',
+    sky: '#3a2418',
+    ground: '#080504',
+    ambient: 0.26,
+    env: 0.3,
+    cove: '#ffcf9a',
     coveIntensity: 1.9,
-    wall: '#171540',
-    floor: '#0a0a1c',
-    accent: '#9d8cff',
+    wall: '#2e1a12',
+    floor: '#150c08',
+    accent: '#e0955c',
     accentInk: ACCENT_INK,
     signInk: SIGN_INK,
     signAccent: SIGN_ACCENT,
@@ -49,22 +49,22 @@ export const PHASES = [
     id: 'firstlight',
     label: 'First light',
     hour: 7,
-    bg: '#0c0f21',
-    fog: '#0d1024',
+    bg: '#130c07',
+    fog: '#140d08',
     fogNear: 16,
     fogFar: 74,
-    sun: '#8a7ed0',
-    sunIntensity: 0.6,
+    sun: '#c07a45',
+    sunIntensity: 0.65,
     sunElevation: 0.3,
-    sky: '#28305c',
-    ground: '#090b18',
-    ambient: 0.21,
-    env: 0.27,
-    cove: '#d6d4ff',
+    sky: '#4d2f1d',
+    ground: '#0c0806',
+    ambient: 0.32,
+    env: 0.36,
+    cove: '#ffd9ab',
     coveIntensity: 1.6,
-    wall: '#231f52',
-    floor: '#12112a',
-    accent: '#a897ff',
+    wall: '#3d2418',
+    floor: '#1c1109',
+    accent: '#eda468',
     accentInk: ACCENT_INK,
     signInk: SIGN_INK,
     signAccent: SIGN_ACCENT,
@@ -72,25 +72,25 @@ export const PHASES = [
     bloom: 0.36,
   },
   {
-    id: 'bluehour',
-    label: 'Blue hour',
+    id: 'goldenhour',
+    label: 'Golden hour',
     hour: 13,
-    bg: '#101529',
-    fog: '#11162c',
+    bg: '#1a1009',
+    fog: '#1b110a',
     fogNear: 19,
     fogFar: 86,
-    sun: '#9fb0e8',
-    sunIntensity: 0.9,
+    sun: '#ffa860',
+    sunIntensity: 0.95,
     sunElevation: 0.72,
-    sky: '#33406f',
-    ground: '#0d1020',
-    ambient: 0.29,
-    env: 0.35,
-    cove: '#e4ecff',
+    sky: '#6a421f',
+    ground: '#120b07',
+    ambient: 0.4,
+    env: 0.44,
+    cove: '#ffe0b8',
     coveIntensity: 1.35,
-    wall: '#2a2560',
-    floor: '#171634',
-    accent: '#9c8dff',
+    wall: '#523020',
+    floor: '#26150d',
+    accent: '#f2ac6c',
     accentInk: ACCENT_INK,
     signInk: SIGN_INK,
     signAccent: SIGN_ACCENT,
@@ -98,25 +98,25 @@ export const PHASES = [
     bloom: 0.27,
   },
   {
-    id: 'violet',
-    label: 'Violet hour',
+    id: 'duskrose',
+    label: 'Dusk rose',
     hour: 19.5,
-    bg: '#0d0819',
-    fog: '#0e091b',
+    bg: '#150a09',
+    fog: '#160b0a',
     fogNear: 15,
     fogFar: 70,
-    sun: '#a866d8',
-    sunIntensity: 0.78,
+    sun: '#e0705a',
+    sunIntensity: 0.82,
     sunElevation: 0.18,
-    sky: '#3a2260',
-    ground: '#0a0614',
-    ambient: 0.2,
-    env: 0.29,
-    cove: '#eed6ff',
+    sky: '#5c2c26',
+    ground: '#0f0706',
+    ambient: 0.32,
+    env: 0.37,
+    cove: '#ffcdb0',
     coveIntensity: 1.75,
-    wall: '#2c1a52',
-    floor: '#150e2c',
-    accent: '#b58bff',
+    wall: '#4a2622',
+    floor: '#200f0e',
+    accent: '#ef9a7c',
     accentInk: ACCENT_INK,
     signInk: SIGN_INK,
     signAccent: SIGN_ACCENT,

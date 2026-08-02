@@ -22,19 +22,6 @@ function sampleSpine() {
   return pts
 }
 
-/**
- * The side gallery is lit by a skylight, not the cove, so its surfaces are
- * tinted warm through the vertex colours — one mesh, two moods, no second
- * material. Returns an RGB multiplier for a given depth.
- */
-const WARM_FROM = -118
-const WARM_FULL = -126
-function warmth(z) {
-  const k = THREE.MathUtils.smoothstep(z, WARM_FULL, WARM_FROM) // 1 → 0 going deeper
-  const w = 1 - k
-  return [1 + w * 0.95, 1 + w * 0.14, 1 - w * 0.62]
-}
-
 /** Build one quad strip from paired edge points, with baked AO in vertex colours. */
 function strip(edgeA, edgeB, normalFor, uvFor, aoFor) {
   const n = edgeA.length
@@ -56,10 +43,7 @@ function strip(edgeA, edgeB, normalFor, uvFor, aoFor) {
       normal[vi + 1] = nrm[1]
       normal[vi + 2] = nrm[2]
       const ao = aoFor(i, s)
-      const tint = warmth(p[2])
-      color[vi] = ao * tint[0]
-      color[vi + 1] = ao * tint[1]
-      color[vi + 2] = ao * tint[2]
+      color[vi] = color[vi + 1] = color[vi + 2] = ao
       const t = uvFor(i, s)
       uv[(i * 2 + s) * 2] = t[0]
       uv[(i * 2 + s) * 2 + 1] = t[1]
@@ -173,13 +157,9 @@ function buildGeometry() {
   )
 
   // ---- the cove: a light slot down the centre of the ceiling --------------
-  // It stops short of the side gallery on purpose: that room is lit by its own
-  // warm skylight, and running the cold cove into it would flatten the change.
-  const coveCut = spine.findIndex((s) => s.z < WARM_FROM)
-  const coveSpine = coveCut === -1 ? spine : spine.slice(0, coveCut)
   const cove = strip(
-    coveSpine.map((s) => [s.cx - 0.7, s.h - 0.06, s.z]),
-    coveSpine.map((s) => [s.cx + 0.7, s.h - 0.06, s.z]),
+    spine.map((s) => [s.cx - 0.7, s.h - 0.06, s.z]),
+    spine.map((s) => [s.cx + 0.7, s.h - 0.06, s.z]),
     () => [0, -1, 0],
     (i, s) => [run[i] / 6, s],
     () => 1
@@ -221,13 +201,6 @@ export default function Hall({ palette, quality }) {
     [palette.cove, palette.dark]
   )
 
-  /** The wall colour as it reads under the side gallery's skylight. */
-  const warmWall = useMemo(() => {
-    const [r, g, b] = warmth(-140)
-    const c = new THREE.Color(palette.wall)
-    c.setRGB(c.r * r, c.g * g, c.b * b)
-    return c
-  }, [palette.wall])
 
   const wallColor = palette.wall
   const floorColor = palette.floor
@@ -320,12 +293,9 @@ export default function Hall({ palette, quality }) {
       <mesh geometry={geo.capBack}>
         <meshStandardMaterial color={wallColor} roughness={0.95} side={THREE.DoubleSide} />
       </mesh>
-      {/* The far cap is the wall you face on arrival in the side gallery, and
-          it is a flat plane rather than part of the vertex-coloured strip — so
-          it takes the warm tint directly, or the room stays stubbornly violet
-          behind its warmest canvas. */}
+      {/* The wall you face on arrival in the side gallery. */}
       <mesh geometry={geo.capFar}>
-        <meshStandardMaterial color={warmWall} roughness={0.95} side={THREE.DoubleSide} />
+        <meshStandardMaterial color={wallColor} roughness={0.95} side={THREE.DoubleSide} />
       </mesh>
     </group>
   )

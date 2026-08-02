@@ -64,16 +64,20 @@ function Windows({ palette }) {
   )
 }
 
-/** Three lamps riding along inside the ceiling slot, so the cove actually lights. */
-const COVE_OFFSETS = [5, -8, -21]
+/**
+ * Lamps riding along inside the ceiling slot, so the cove actually lights.
+ *
+ * Two, not three. Every light in the scene is evaluated for every lit pixel of
+ * every material, so on integrated graphics the light COUNT is one of the
+ * largest costs in the whole frame — larger than most of what it illuminates.
+ */
+const COVE_OFFSETS = [3, -13]
 
 export default function Lighting({ palette, quality }) {
   const camera = useThree((s) => s.camera)
   const sun = useRef()
   const spotA = useRef()
-  const spotB = useRef()
   const targetA = useRef()
-  const targetB = useRef()
   const coves = useRef([])
   const panels = useMemo(() => {
     const l = panelLayout()
@@ -84,7 +88,6 @@ export default function Lighting({ palette, quality }) {
 
   useEffect(() => {
     if (spotA.current && targetA.current) spotA.current.target = targetA.current
-    if (spotB.current && targetB.current) spotB.current.target = targetB.current
   }, [])
 
   useFrame(() => {
@@ -113,18 +116,11 @@ export default function Lighting({ palette, quality }) {
     // objects plus an array plus a sort each time is pure garbage collection.
     let bestP = null
     let bestD = Infinity
-    let secondP = null
-    let secondD = Infinity
     for (const p of panels) {
       const d = camera.position.distanceTo(p.centre)
       if (d < bestD) {
-        secondP = bestP
-        secondD = bestD
-        bestP = p
         bestD = d
-      } else if (d < secondD) {
-        secondP = p
-        secondD = d
+        bestP = p
       }
     }
 
@@ -140,11 +136,12 @@ export default function Lighting({ palette, quality }) {
       target.current.position.copy(c)
       target.current.updateMatrixWorld()
       const falloff = THREE.MathUtils.clamp(1 - (d - 4) / 12, 0.12, 1)
-      light.current.intensity = 15 * falloff
+      // Restrained now that ambient carries more of the room: a cream panel
+      // face under a hard spot loses its own title to glare.
+      light.current.intensity = 6.5 * falloff
     }
 
     assign(spotA, targetA, bestP, bestD)
-    assign(spotB, targetB, secondP, secondD)
   })
 
   return (
@@ -176,9 +173,11 @@ export default function Lighting({ palette, quality }) {
           key={off}
           ref={(el) => (coves.current[i] = el)}
           color={palette.cove}
-          intensity={palette.coveIntensity * (i === 0 ? 30 : 24)}
-          distance={36}
-          decay={1.4}
+          // Two lamps doing the work of three, so each carries more and reaches
+          // further before it falls off.
+          intensity={palette.coveIntensity * (i === 0 ? 46 : 38)}
+          distance={44}
+          decay={1.15}
         />
       ))}
 
@@ -210,8 +209,6 @@ export default function Lighting({ palette, quality }) {
         decay={1.6}
       />
       <object3D ref={targetA} />
-      <spotLight ref={spotB} color={palette.cove} intensity={0} angle={0.7} penumbra={0.95} distance={12} decay={1.7} />
-      <object3D ref={targetB} />
 
       <Windows palette={palette} />
     </>

@@ -175,7 +175,12 @@ function Ready() {
  * the stutter-then-garbage it was supposed to prevent. Resolution is the
  * biggest lever anyway and costs nothing to change.
  */
-const DPR_STEPS = [1.25, 1, 0.85, 0.7]
+/**
+ * Never below 1. Dropping under native resolution upscales a soft image across
+ * the entire screen, so the site stops looking slow and starts looking broken —
+ * a blurry 30fps reads far worse than a crisp one.
+ */
+const DPR_STEPS = [1.25, 1]
 
 function PerfGuard() {
   const gl = useThree((s) => s.gl)

@@ -6,13 +6,13 @@
 /* The studio is after hours, so midnight is the default — not an override.
    Putting it on :root means there is no light flash before JS boots. */
 :root {
-  --paper: #080a16;
-  --card: rgba(21, 25, 48, 0.7);
-  --ink: #eae8f8;
-  --ink-soft: #b6b2d6;
-  --muted: #837fa8;
-  --hair: rgba(190, 186, 235, 0.18);
-  --accent: #a794ff;
+  --paper: #120b07;
+  --card: rgba(44, 26, 17, 0.7);
+  --ink: #f6e9da;
+  --ink-soft: #d3bda6;
+  --muted: #9c8168;
+  --hair: rgba(238, 214, 184, 0.18);
+  --accent: #f0a866;
   --shadow: 0 20px 64px -24px rgba(0, 0, 0, 0.85);
 
   --display: 'Instrument Serif', Georgia, 'Times New Roman', serif;

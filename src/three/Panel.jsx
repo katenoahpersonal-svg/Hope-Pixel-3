@@ -87,7 +87,7 @@ export default function Panel({
 
     // The face is a lit display: brighter as you approach, brightest on hover.
     if (artMat.current) {
-      artMat.current.emissiveIntensity = damp(artMat.current.emissiveIntensity, 0.22 + f * 0.5 + hv * 0.42, 6, dt)
+      artMat.current.emissiveIntensity = damp(artMat.current.emissiveIntensity, 0.1 + f * 0.32 + hv * 0.3, 6, dt)
     }
 
     // Light catching the glass, dragged by the pointer.

@@ -56,7 +56,7 @@ function Piece({ piece, palette }) {
     inner.current.position.z = damp(inner.current.position.z, k * 0.07, 8, dt)
     // Barely any self-illumination: the picture light does the work, otherwise
     // a pale canvas under a warm spot blows straight out to white.
-    if (mat.current) mat.current.emissiveIntensity = damp(mat.current.emissiveIntensity, 0.03 + k * 0.16, 6, dt)
+    if (mat.current) mat.current.emissiveIntensity = damp(mat.current.emissiveIntensity, 0.14 + k * 0.2, 6, dt)
   })
 
   return (
@@ -85,7 +85,7 @@ function Piece({ piece, palette }) {
             map={art}
             emissiveMap={art}
             emissive="#ffffff"
-            emissiveIntensity={0.03}
+            emissiveIntensity={0.14}
             roughness={0.88}
             metalness={0}
           />
@@ -113,25 +113,9 @@ function Piece({ piece, palette }) {
       </mesh>
 
       {/* its own picture light */}
-      {/* Set back and opened up, so it grazes the whole canvas instead of
-          burning a hot spot into the top of it.
-
-          The target is a CHILD of the light, offset back to the canvas centre.
-          A spotlight's default target is an orphan Object3D whose matrixWorld
-          never updates, and `target-position` here would be read in the group's
-          local space while the light already sits inside that group — so the
-          beam ended up aimed into nowhere and the wall stayed unlit. */}
-      <spotLight
-        position={[0, mid + 1.7, 2.4]}
-        color={WARM}
-        intensity={9}
-        angle={0.8}
-        penumbra={0.95}
-        distance={11}
-        decay={1.25}
-      >
-        <object3D attach="target" position={[0, -1.7, -2.4]} />
-      </spotLight>
+      {/* No picture light. Three of them meant three more lights evaluated on
+          every pixel of the whole building, and the canvases carry themselves
+          on emissive plus the room lamp. */}
     </group>
   )
 }
@@ -151,22 +135,15 @@ function Skylight() {
         <planeGeometry args={[3.1, length]} />
         <meshBasicMaterial color="#f6dcb8" side={THREE.DoubleSide} />
       </mesh>
-      {/* Slow falloff so the daylight actually reaches the side walls — a tight
-          decay left the room dark between the pictures. */}
-      {[-0.32, 0.06, 0.42].map((f) => (
-        <pointLight
-          key={f}
-          position={[cx, h - 1.2, zMid + f * length]}
-          color={WARM}
-          intensity={30}
-          distance={24}
-          decay={1.05}
-        />
-      ))}
-      {/* Broad, slow-decaying fill at head height. Without it the side walls
-          fall to black between the pictures and the room reads as spotlights in
-          the dark rather than as daylight. */}
-      <pointLight position={[cx, 2.7, zMid]} color={WARM} intensity={24} distance={30} decay={0.85} />
+      {/* One lamp for the whole room. Slow decay so it actually reaches the
+          side walls — a tight falloff left them black between the pictures. */}
+      <pointLight
+        position={[cx, h - 1.6, zMid]}
+        color={WARM}
+        intensity={42}
+        distance={34}
+        decay={0.8}
+      />
     </group>
   )
 }

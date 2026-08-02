@@ -16,7 +16,15 @@ export default function Effects({ palette, quality }) {
   const dof = useRef()
   const bloom = useRef()
   const gl = useThree((s) => s.gl)
-  const enableDof = quality !== 'low'
+  /**
+   * Depth of field is a `high` luxury only.
+   *
+   * It renders the blur at half resolution and composites it over everything,
+   * so on hardware that cannot afford it the result is not "tasteful bokeh" —
+   * it is a scene that looks permanently out of focus while also running
+   * slower. Sharp at 30fps beats soft at 30fps.
+   */
+  const enableDof = quality === 'high'
 
   useEffect(() => {
     gl.toneMapping = THREE.ACESFilmicToneMapping
