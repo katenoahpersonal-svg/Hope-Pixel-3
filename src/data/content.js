@@ -737,6 +737,6 @@ export const studioWork = {
 
 export const contact = {
   heading: 'Let’s talk.',
-  body: 'Hiring, a project, or a question about something in this room — all welcome. The form opens a pre-filled email; nothing is stored or sent anywhere else.',
+  body: 'Hiring, a project, or a question about something in this room. The form opens a pre-filled email; nothing is stored anywhere.',
   subjects: ['A role', 'A studio project', 'Something else'],
 }

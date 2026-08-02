@@ -126,6 +126,21 @@ export default function App() {
       up()
     }
 
+    /* The wheel always walks the hall.
+       These reading panels cover a third of the screen, so the cursor sits over
+       one most of the time. Left alone, a panel with more content than height
+       swallows the gesture and the room simply stops — which reads as the site
+       freezing, not as a scroll landing somewhere else. The case study dialog is
+       excluded: there the page is locked and the dialog is what should scroll. */
+    const wheel = (e) => {
+      if (!(e.target instanceof Element)) return
+      if (e.target.closest('.study')) return
+      if (!e.target.closest('.column, .caption, .index')) return
+      e.preventDefault()
+      window.scrollBy(0, e.deltaY)
+    }
+    window.addEventListener('wheel', wheel, { passive: false })
+
     window.addEventListener('pointermove', move, { passive: true })
     window.addEventListener('pointerdown', down)
     window.addEventListener('pointerup', up)
@@ -134,6 +149,7 @@ export default function App() {
 
     return () => {
       unbind()
+      window.removeEventListener('wheel', wheel)
       window.removeEventListener('pointermove', move)
       window.removeEventListener('pointerdown', down)
       window.removeEventListener('pointerup', up)

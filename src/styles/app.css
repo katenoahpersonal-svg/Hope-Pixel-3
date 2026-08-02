@@ -577,18 +577,19 @@ body.is-turning .stage canvas { cursor: grabbing; }
   top: 50%;
   transform: translateY(-50%);
   width: min(27rem, 42vw);
-  max-height: min(78vh, 46rem);
-  padding: 1.6rem 1.7rem;
+  max-height: min(80vh, 46rem);
+  padding: 1.3rem 1.45rem;
   border-radius: 16px;
   background: var(--card);
   border: 1px solid var(--hair);
   backdrop-filter: blur(22px) saturate(1.35);
   -webkit-backdrop-filter: blur(22px) saturate(1.35);
   box-shadow: var(--shadow);
-  /* Scrollable, not clipped. With `hidden` the contact form lost its Send
-     button and every link below it, and Expertise lost two of six cards. */
+  /* Scrollable, not clipped — with `hidden` the contact form lost its Send
+     button and every link below it. But NOT `overscroll-behavior: contain`:
+     that stopped a finished scroll from ever chaining out to the page, which
+     froze the camera whenever the cursor rested on a panel. */
   overflow-y: auto;
-  overscroll-behavior: contain;
   scrollbar-width: thin;
   scrollbar-color: color-mix(in srgb, var(--accent) 55%, transparent) transparent;
   z-index: 15;
@@ -614,7 +615,7 @@ body.is-turning .stage canvas { cursor: grabbing; }
   margin-top: 1rem;
 }
 .disc {
-  padding: 0.75rem 0.85rem;
+  padding: 0.55rem 0.7rem;
   border: 1px solid var(--hair);
   border-radius: 10px;
   transition: border-color 0.5s, background 0.5s, transform 0.5s;
@@ -634,7 +635,7 @@ body.is-turning .stage canvas { cursor: grabbing; }
 
 /* --- contact form -------------------------------------------------- */
 
-.form { display: grid; gap: 0.7rem; margin-top: 1rem; }
+.form { display: grid; gap: 0.5rem; margin-top: 0.75rem; }
 .field { display: grid; gap: 0.3rem; }
 .field label {
   font-size: 0.6rem;
@@ -642,6 +643,8 @@ body.is-turning .stage canvas { cursor: grabbing; }
   text-transform: uppercase;
   color: var(--muted);
 }
+.form__row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+
 .field input,
 .field textarea,
 .field select {
@@ -651,11 +654,11 @@ body.is-turning .stage canvas { cursor: grabbing; }
   background: color-mix(in srgb, var(--paper) 55%, transparent);
   border: 1px solid var(--hair);
   border-radius: 8px;
-  padding: 0.6rem 0.7rem;
+  padding: 0.45rem 0.6rem;
   width: 100%;
   transition: border-color 0.3s, background 0.3s;
 }
-.field textarea { resize: vertical; min-height: 5.2rem; }
+.field textarea { resize: vertical; min-height: 3.9rem; }
 .field input:focus, .field textarea:focus, .field select:focus {
   border-color: var(--accent);
   outline: none;

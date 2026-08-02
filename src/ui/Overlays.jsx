@@ -261,13 +261,15 @@ function Contact({ show }) {
       <p style={{ fontSize: '0.84rem' }}>{contactCopy.body}</p>
 
       <form className="form" onSubmit={submit}>
-        <div className="field">
-          <label htmlFor="c-name">Name</label>
-          <input id="c-name" required value={form.name} onChange={set('name')} autoComplete="name" />
-        </div>
-        <div className="field">
-          <label htmlFor="c-email">Email</label>
-          <input id="c-email" type="email" required value={form.email} onChange={set('email')} autoComplete="email" />
+        <div className="form__row">
+          <div className="field">
+            <label htmlFor="c-name">Name</label>
+            <input id="c-name" required value={form.name} onChange={set('name')} autoComplete="name" />
+          </div>
+          <div className="field">
+            <label htmlFor="c-email">Email</label>
+            <input id="c-email" type="email" required value={form.email} onChange={set('email')} autoComplete="email" />
+          </div>
         </div>
         <div className="field">
           <label htmlFor="c-subject">About</label>
@@ -293,10 +295,9 @@ function Contact({ show }) {
         </div>
       )}
 
+      {/* No separate Email button — the form already sends one, and the panel
+          has to fit without needing its own scrollbar. */}
       <div className="links">
-        <a className="btn btn--sm" href={`mailto:${identity.email}`}>
-          Email
-        </a>
         <a className="btn btn--sm" href={identity.linkedin.href} target="_blank" rel="noopener noreferrer">
           LinkedIn
         </a>
