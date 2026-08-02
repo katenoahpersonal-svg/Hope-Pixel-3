@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useRef } from 'react'
 import * as THREE from 'three'
 import { useFrame, useThree } from '@react-three/fiber'
 import Panel, { LIFT } from './Panel'
@@ -50,6 +50,8 @@ export default function Gallery({ palette, quality }) {
   const openProject = useStore((s) => s.openProject)
   const layout = useMemo(panelLayout, [])
   const all = useMemo(() => [layout.hero, ...layout.wall], [layout])
+  /** Which panel currently holds focus — the incumbent, for the hysteresis below. */
+  const held = useRef(-1)
 
   const dimmedIds = useMemo(() => {
     if (filter === 'All') return new Set()
@@ -62,17 +64,39 @@ export default function Gallery({ palette, quality }) {
     // No allocation in here — it runs every frame.
     let nearest = null
     let bestD = Infinity
+    let heldPanel = null
+    let heldD = Infinity
     for (const p of all) {
       if (dimmedIds.has(p.project.id)) continue
       const d = camera.position.distanceTo(p.centre)
+      if (p.index === held.current) {
+        heldPanel = p
+        heldD = d
+      }
       if (d < bestD) {
         bestD = d
         nearest = p
       }
     }
 
+    /**
+     * Hysteresis, and it is not optional.
+     *
+     * Panels alternate walls, and the camera leans toward whichever is nearest.
+     * Halfway between two of them the distances are all but identical, so the
+     * winner flipped every frame — and because leaning left puts you closer to
+     * the panel on the right, the lean fed the flip. A perfect oscillator: the
+     * room shook sixty times a second. A challenger now has to be clearly
+     * closer before it takes over.
+     */
+    if (heldPanel && heldD < 11 && bestD > heldD - 1.4) {
+      nearest = heldPanel
+      bestD = heldD
+    }
+
     const best = nearest ? nearest.index : -1
     const near = nearest && bestD < 11
+    held.current = near ? best : -1
     frame.focus = near ? best : -1
     const amount = near ? THREE.MathUtils.clamp(1 - (bestD - 3) / 7, 0, 1) : 0
     frame.focusAmount = THREE.MathUtils.damp(finite(frame.focusAmount), amount, 5, dt)

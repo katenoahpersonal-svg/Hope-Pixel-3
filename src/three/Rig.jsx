@@ -58,6 +58,9 @@ export default function Rig({ quality }) {
   const pos = useRef(new THREE.Vector3(0, EYE, 14))
   const yaw = useRef(0)
   const pitch = useRef(0)
+  const bias = useRef(0)
+  const leanPoint = useRef(new THREE.Vector3(0, EYE, -10))
+  const hasLean = useRef(false)
   const lastSection = useRef('')
 
   const openPanel = useMemo(() => {
@@ -101,15 +104,20 @@ export default function Rig({ quality }) {
     frame.camZ = z
 
     // --- lean toward whatever panel is nearest ----------------------------
-    let sideBias = 0
-    let leanTarget = null
-    if (frame.focus !== -1) {
-      const p = byIndex.get(frame.focus)
-      if (p) {
-        sideBias = -p.side * frame.focusAmount * (portrait ? 2.1 : 1.55)
-        leanTarget = p.centre
-      }
+    // Both the sideways bias and the point being looked at are eased rather
+    // than set. Even with hysteresis choosing sensibly, handing focus from a
+    // panel on one wall to one on the other flips these end to end, and a snap
+    // there is a jolt.
+    let wantBias = 0
+    const p = frame.focus !== -1 ? byIndex.get(frame.focus) : null
+    if (p) {
+      wantBias = -p.side * frame.focusAmount * (portrait ? 2.1 : 1.55)
+      leanPoint.current.lerp(p.centre, 1 - Math.exp(-5 * dt))
+      hasLean.current = true
     }
+    bias.current = damp(bias.current, wantBias, 4.5, dt)
+    const sideBias = bias.current
+    const leanTarget = p && hasLean.current ? leanPoint.current : null
 
     // --- pointer orbit ----------------------------------------------------
     const orbit = quality === 'low' ? 0.35 : 1
