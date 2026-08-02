@@ -176,54 +176,38 @@ function Ready() {
  * biggest lever anyway and costs nothing to change.
  */
 /**
- * Never below 1. Dropping under native resolution upscales a soft image across
- * the entire screen, so the site stops looking slow and starts looking broken —
- * a blurry 30fps reads far worse than a crisp one.
+ * Reports the frame rate. Deliberately changes NOTHING.
+ *
+ * This used to adapt quality while running, and it caused more damage than the
+ * slowness it was chasing. Lowering the tier re-rendered the scene mid-scroll
+ * and rebuilt the whole effect pipeline. Lowering the pixel ratio was worse
+ * still: `gl.setPixelRatio` resizes the renderer's drawing buffer WITHOUT
+ * telling the post-processing composer, whose render targets stay at the old
+ * size — so the scene is drawn into one size and presented at another, and the
+ * image tiles into repeated copies of itself. Both effects landed a few seconds
+ * into scrolling, which is exactly when a visitor is least able to explain what
+ * they just saw.
+ *
+ * Cost is decided once, up front, from the GPU. After that the renderer is left
+ * alone, so what you see is what the machine actually does — which also makes
+ * any remaining report of slowness mean something.
  */
-const DPR_STEPS = [1.25, 1]
-
-function PerfGuard() {
-  const gl = useThree((s) => s.gl)
+function FpsMeter() {
   const frameloop = useThree((s) => s.frameloop)
-  const acc = useRef({ elapsed: 0, frames: 0, slow: 0, warmup: 0 })
+  const acc = useRef({ elapsed: 0, frames: 0 })
 
   useFrame((_, delta) => {
     // Hand-stepped frames say nothing about real performance.
     if (frameloop === 'never') return
-    // A delta over a second means the tab was backgrounded or the machine
-    // stalled on something outside our control — not a frame rate.
+    // A delta over a second means the tab was backgrounded, not a frame rate.
     if (!Number.isFinite(delta) || delta > 1) return
     const a = acc.current
-
-    // Ignore the first couple of seconds: shaders are still compiling and every
-    // frame in that window is slow no matter what the hardware is.
-    if (a.warmup < 2.5) {
-      a.warmup += delta
-      return
-    }
-
     a.elapsed += delta
     a.frames++
     if (a.elapsed < 1) return
-
-    const fps = a.frames / a.elapsed
-    window.__fps = Math.round(fps)
+    window.__fps = Math.round(a.frames / a.elapsed)
     a.elapsed = 0
     a.frames = 0
-    a.slow = fps < 45 ? a.slow + 1 : 0
-    if (a.slow < 2) return
-    a.slow = 0
-
-    const current = gl.getPixelRatio()
-    const next = DPR_STEPS.find((step) => step < current - 0.01)
-    if (next === undefined) return
-
-    console.info(`[studio] ${Math.round(fps)}fps — dropping resolution ${current.toFixed(2)} → ${next}`)
-    gl.setPixelRatio(next)
-    if (gl.shadowMap.enabled) {
-      gl.shadowMap.enabled = false
-      gl.shadowMap.needsUpdate = true
-    }
   })
 
   return null
@@ -248,7 +232,7 @@ export default function Scene() {
       <Rig quality={quality} />
       <Effects palette={palette} quality={quality} />
       <Frameloop />
-      <PerfGuard />
+      <FpsMeter />
       <Ready />
     </>
   )
