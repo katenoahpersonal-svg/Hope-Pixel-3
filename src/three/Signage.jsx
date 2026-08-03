@@ -33,7 +33,6 @@ function HeroType({ palette }) {
       heroTypeTexture({
         first: identity.first,
         last: identity.last,
-        role: 'Design · Ecommerce · Marketing · Creative Production',
         accent: palette.signAccent,
         ink: palette.signInk,
       }),
@@ -43,20 +42,20 @@ function HeroType({ palette }) {
   useFrame((state, delta) => {
     const dt = safeDt(delta)
     if (!ref.current) return
-    // Narrow windows get smaller, centred type — at 9 metres wide it would
-    // otherwise run off both sides of a phone.
+    // Narrow windows get smaller, centred type — at seven metres wide it would
+    // otherwise run off both sides of a phone. No pointer parallax: the room
+    // holds still now, and the title with it.
     const portrait = state.size.width < state.size.height
-    const scale = portrait ? 0.6 : 1
-    ref.current.scale.setScalar(damp(ref.current.scale.x, scale, 4, dt))
-    // Sits a little deeper than the camera orbit, so it parallaxes against the room.
-    ref.current.position.x = damp(ref.current.position.x, (portrait ? -0.2 : -1) + frame.mx * -0.36, 3, dt)
-    ref.current.position.y = damp(ref.current.position.y, (portrait ? 3.2 : 3.05) + frame.my * 0.16, 3, dt)
+    ref.current.scale.setScalar(damp(ref.current.scale.x, portrait ? 0.62 : 1, 4, dt))
+    ref.current.position.x = damp(ref.current.position.x, portrait ? 0 : -2.1, 3, dt)
   })
 
   return (
-    <group ref={ref} position={[-1, 3.05, 3]}>
+    // Set left of the walkway and lifted, so the corridor keeps its vanishing
+    // point and you can see straight down the hall past the title.
+    <group ref={ref} position={[-2.1, 4.15, 3]}>
       <mesh raycast={() => null}>
-        <planeGeometry args={[9.2, 4.6]} />
+        <planeGeometry args={[7.2, 2.67]} />
         <meshStandardMaterial
           map={tex}
           transparent

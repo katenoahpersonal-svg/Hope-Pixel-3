@@ -5,7 +5,7 @@ import Overlays, { DepthRail } from './ui/Overlays'
 import CaseStudy from './ui/CaseStudy'
 import { FlatSite, SemanticContent } from './ui/FlatSite'
 import { frame, useStore, SCROLL_SCREENS, detectQuality } from './state/store'
-import { initScroll, scrollToT } from './lib/scroll'
+import { initScroll, scrollToT, cancelTravel } from './lib/scroll'
 import { bindHistory, initialStudy, openStudy } from './lib/navigate'
 import { currentHour } from './lib/palette'
 import { projects } from './data/content'
@@ -135,11 +135,15 @@ export default function App() {
     const wheel = (e) => {
       if (!(e.target instanceof Element)) return
       if (e.target.closest('.study')) return
+      // Touching the wheel abandons any nav journey in progress — the visitor
+      // has taken the controls back.
+      cancelTravel()
       if (!e.target.closest('.column, .caption, .index')) return
       e.preventDefault()
       window.scrollBy(0, e.deltaY)
     }
     window.addEventListener('wheel', wheel, { passive: false })
+    window.addEventListener('touchstart', cancelTravel, { passive: true })
 
     window.addEventListener('pointermove', move, { passive: true })
     window.addEventListener('pointerdown', down)
@@ -150,6 +154,7 @@ export default function App() {
     return () => {
       unbind()
       window.removeEventListener('wheel', wheel)
+      window.removeEventListener('touchstart', cancelTravel)
       window.removeEventListener('pointermove', move)
       window.removeEventListener('pointerdown', down)
       window.removeEventListener('pointerup', up)

@@ -404,6 +404,17 @@ body.is-turning .stage canvas { cursor: grabbing; }
   max-width: min(34rem, 62vw);
   z-index: 15;
 }
+
+/* ?intro=right — the same block set into the empty floor on the far side. */
+.home--right {
+  left: auto;
+  right: var(--gut);
+  text-align: right;
+}
+.home--right .home__spec { justify-content: flex-end; }
+.home--right .home__spec li + li::before { left: -0.6rem; }
+.home--right .home__cta { justify-content: flex-end; }
+.home--right .home__lede { margin-left: auto; }
 .home__title { font-size: clamp(1.5rem, 2.6vw, 2.2rem); margin-bottom: 0.9rem; }
 .home__lede {
   font-size: clamp(0.95rem, 1.25vw, 1.08rem);

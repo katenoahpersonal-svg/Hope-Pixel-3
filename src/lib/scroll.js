@@ -44,10 +44,46 @@ export function scrollHeightPx() {
   return `${SCROLL_SCREENS * 100}vh`
 }
 
-/** Glide (or jump) to a progress value 0..1. */
-export function scrollToT(t, { immediate = false } = {}) {
-  const top = Math.max(0, Math.min(1, t)) * maxScroll()
-  window.scrollTo({ top, behavior: immediate ? 'auto' : 'smooth' })
+let travel = 0
+
+/** Stop any nav journey in progress. Any real input from the visitor wins. */
+export function cancelTravel() {
+  if (travel) {
+    cancelAnimationFrame(travel)
+    travel = 0
+  }
+}
+
+/**
+ * Glide (or jump) to a progress value 0..1.
+ *
+ * Hand-animated rather than `behavior: 'smooth'`. The browser's smooth scroll
+ * cannot be interrupted — travelling the length of the building from the side
+ * gallery back to the entrance is thousands of pixels, and for the whole of
+ * that flight the visitor's own scrolling is ignored. That is indistinguishable
+ * from the page having frozen. This version has a fixed, short duration however
+ * far it is going, and any wheel or touch cancels it outright.
+ */
+export function scrollToT(t, { immediate = false, duration = 1100 } = {}) {
+  cancelTravel()
+  const to = Math.max(0, Math.min(1, t)) * maxScroll()
+  if (immediate) {
+    window.scrollTo({ top: to, behavior: 'auto' })
+    return
+  }
+
+  const from = scrollY()
+  const distance = to - from
+  if (Math.abs(distance) < 2) return
+  const start = performance.now()
+  const ease = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2)
+
+  const step = (now) => {
+    const k = Math.min(1, (now - start) / duration)
+    window.scrollTo({ top: from + distance * ease(k), behavior: 'auto' })
+    travel = k < 1 ? requestAnimationFrame(step) : 0
+  }
+  travel = requestAnimationFrame(step)
 }
 
 /**

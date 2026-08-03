@@ -254,9 +254,17 @@ export function labelTexture(text, { sub = '', width = 1024, height = 256, ink =
 
 /* ------------------------------------------------------------ hero type */
 
-export function heroTypeTexture({ first, last, role, accent = '#b9793f', ink = '#221f1b' } = {}) {
+/**
+ * The name, and nothing else.
+ *
+ * The specialties used to run underneath it in a line nearly as wide as the
+ * hall — straight across the corridor, the panels and the doorway, while the
+ * same four words sat in the interface below. One of them had to go, and the
+ * one drawn across the architecture was the wrong one to keep.
+ */
+export function heroTypeTexture({ first, last, accent = '#b9793f', ink = '#221f1b' } = {}) {
   const W = 2048
-  const H = 1024
+  const H = 760
   const c = canvas(W, H)
   const ctx = c.getContext('2d')
   ctx.clearRect(0, 0, W, H)
@@ -264,25 +272,19 @@ export function heroTypeTexture({ first, last, role, accent = '#b9793f', ink = '
   ctx.textBaseline = 'alphabetic'
   ctx.fillStyle = ink
   ctx.font = `300px ${DISPLAY}`
-  const fw = ctx.measureText(first).width
-  const lw = ctx.measureText(last).width
-  const maxw = Math.max(fw, lw)
+  const maxw = Math.max(ctx.measureText(first).width, ctx.measureText(last).width)
   const left = (W - maxw) / 2
 
-  ctx.fillText(first, left, 380)
-  ctx.fillText(last, left, 660)
+  ctx.fillText(first, left, 320)
+  ctx.fillText(last, left, 600)
 
   // Accent rule between the words, the width of the longest one.
   ctx.strokeStyle = accent
   ctx.lineWidth = 4
   ctx.beginPath()
-  ctx.moveTo(left, 424)
-  ctx.lineTo(left + maxw, 424)
+  ctx.moveTo(left, 364)
+  ctx.lineTo(left + maxw, 364)
   ctx.stroke()
-
-  ctx.fillStyle = '#6b645a'
-  ctx.font = `400 44px ${TEXT}`
-  tracked(ctx, role.toUpperCase(), W / 2, 780, 8, 'center')
 
   return finish(c)
 }

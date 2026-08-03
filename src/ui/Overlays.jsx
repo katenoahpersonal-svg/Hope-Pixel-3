@@ -21,6 +21,8 @@ import Magnetic from './Magnetic'
 import { resumeUrl } from '../lib/download'
 
 const DEBUG = new URLSearchParams(window.location.search).has('debug')
+/** ?intro=right sets the opening block into the empty floor on the far side. */
+const INTRO_RIGHT = new URLSearchParams(window.location.search).get('intro') === 'right'
 
 /* --------------------------------------------------------- depth rail */
 
@@ -52,7 +54,7 @@ export function DepthRail() {
 function Home({ show }) {
   return (
     <>
-      <div className="home panelfade" data-show={show}>
+      <div className={`home panelfade${INTRO_RIGHT ? ' home--right' : ''}`} data-show={show}>
         <span className="eyebrow">Portfolio · {new Date().getFullYear()}</span>
         <h2 className="home__title">{identity.positioning}</h2>
         <ul className="home__spec">
