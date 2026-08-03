@@ -229,7 +229,7 @@ export default function Scene() {
       <Pedestals palette={palette} />
       <SideGallery palette={palette} />
 
-      <Rig quality={quality} />
+      <Rig />
       <Effects palette={palette} quality={quality} />
       <Frameloop />
       <FpsMeter />

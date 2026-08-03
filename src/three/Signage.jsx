@@ -158,7 +158,9 @@ function ContactPlate({ palette }) {
   const mat = useRef()
   const tex = useMemo(() => contactTexture(identity, palette.accentInk), [palette.accentInk])
   const { cx } = hallAt(CONTACT_Z)
-  const x = cx - 5.2
+  // Ahead and to the left as you come in, now that nothing turns your head for
+  // you — far enough off the line that you still walk past it, not into it.
+  const x = cx - 4.2
 
   useFrame((state) => {
     if (!mat.current) return

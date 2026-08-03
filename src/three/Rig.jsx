@@ -8,9 +8,11 @@ import { safeDt, finite } from '../lib/math'
 import { scrollProgress, isLocked } from '../lib/scroll'
 
 /**
- * The visitor's body in the space. Scroll walks it down the hall, the pointer
- * orbits it a little, proximity leans it toward whatever panel is nearest, and
- * opening a case study dollies it in.
+ * The visitor's body in the space.
+ *
+ * Scroll walks it straight down the hall at eye level. Dragging turns the head,
+ * and holds where you leave it. Opening a case study dollies it in. That is the
+ * whole of it — a walkthrough, not a camera on rails with opinions.
  */
 
 const EYE = 1.62
@@ -37,20 +39,9 @@ function sectionForZ(z) {
   return sections[0].id
 }
 
-/** 0 outside [from, to], easing to 1 over `fade` units inside each end. */
-function smoothWindow(z, from, to, fade) {
-  const a = clamp((from - z) / fade, 0, 1)
-  const b = clamp((z - to) / fade, 0, 1)
-  return Math.min(a, b)
-}
-
-export default function Rig({ quality }) {
+export default function Rig() {
   const camera = useThree((s) => s.camera)
   const layout = useMemo(panelLayout, [])
-  const byIndex = useMemo(
-    () => new Map([layout.hero, ...layout.wall].map((p) => [p.index, p])),
-    [layout]
-  )
   const open = useStore((s) => s.open)
   const setSection = useStore((s) => s.setSection)
 
@@ -58,9 +49,6 @@ export default function Rig({ quality }) {
   const pos = useRef(new THREE.Vector3(0, EYE, 14))
   const yaw = useRef(0)
   const pitch = useRef(0)
-  const bias = useRef(0)
-  const leanPoint = useRef(new THREE.Vector3(0, EYE, -10))
-  const hasLean = useRef(false)
   const lastSection = useRef('')
 
   const openPanel = useMemo(() => {
@@ -71,7 +59,6 @@ export default function Rig({ quality }) {
 
   useFrame((state, delta) => {
     const dt = safeDt(delta)
-    const t = state.clock.elapsedTime
 
     const aspect = state.size.width / Math.max(1, state.size.height)
     const wantFov = fovForAspect(aspect)
@@ -79,12 +66,11 @@ export default function Rig({ quality }) {
       camera.fov = wantFov
       camera.updateProjectionMatrix()
     }
-    const portrait = aspect < 1
 
     // --- scroll easing that reacts to how fast you are scrolling -----------
     frame.t = finite(frame.t)
-    frame.mx = finite(frame.mx)
-    frame.my = finite(frame.my)
+    frame.dragYaw = finite(frame.dragYaw)
+    frame.dragPitch = finite(frame.dragPitch)
     frame.focusAmount = finite(frame.focusAmount)
 
     // Sample the document's scroll position every frame rather than waiting for
@@ -100,52 +86,24 @@ export default function Rig({ quality }) {
     frame.t = clamp(damp(frame.t, target, lambda, dt), 0, 1)
 
     const z = tToZ(frame.t)
-    const { cx, hw } = hallAt(z)
+    const { cx } = hallAt(z)
     frame.camZ = z
 
-    // --- lean toward whatever panel is nearest ----------------------------
-    // Both the sideways bias and the point being looked at are eased rather
-    // than set. Even with hysteresis choosing sensibly, handing focus from a
-    // panel on one wall to one on the other flips these end to end, and a snap
-    // there is a jolt.
-    let wantBias = 0
-    const p = frame.focus !== -1 ? byIndex.get(frame.focus) : null
-    if (p) {
-      wantBias = -p.side * frame.focusAmount * (portrait ? 2.1 : 1.55)
-      leanPoint.current.lerp(p.centre, 1 - Math.exp(-5 * dt))
-      hasLean.current = true
-    }
-    bias.current = damp(bias.current, wantBias, 4.5, dt)
-    const sideBias = bias.current
-    const leanTarget = p && hasLean.current ? leanPoint.current : null
+    /* --- the walk --------------------------------------------------------
+     *
+     * Dead straight down the centre line, eyes level, facing the way you are
+     * going. Nothing here reacts to what is on the walls.
+     *
+     * There used to be a bob, a sideways lean toward whichever panel was
+     * nearest, a mouse parallax and scripted head-turns in the alcove and the
+     * quiet room. Individually each was subtle; together they meant the room
+     * was never still and never quite went where you pointed it. Walking is
+     * walking — looking is the drag, and only the drag.
+     */
+    pos.current.set(cx, EYE, z)
 
-    // --- pointer orbit ----------------------------------------------------
-    const orbit = quality === 'low' ? 0.35 : 1
-    const ox = frame.mx * 0.62 * orbit
-    const oy = -frame.my * 0.3 * orbit
-
-    // --- the walking camera ------------------------------------------------
-    const wobble = Math.sin(t * 0.31) * 0.018 + Math.sin(t * 0.17 + 1.3) * 0.012
-    const wantX = clamp(cx + sideBias + ox, cx - hw + 1.1, cx + hw - 1.1)
-    const wantY = EYE + oy + wobble
-    pos.current.set(wantX, wantY, z)
-
-    // --- where the eyes go -------------------------------------------------
     const aheadZ = z - 9
-    const ahead = hallAt(aheadZ)
-    // In the alcove the head turns to take in the pedestals on either side.
-    const sweep =
-      // the alcove: the head turns to take in the pedestals on either side
-      Math.sin((z + 76) * 0.42) * 3.4 * smoothWindow(z, -76, -94, 3) +
-      // The quiet room: turn toward the closing statement on the approach, then
-      // release well before reaching it, so the walk ends facing the way out
-      // rather than nose-first into the back of a wall.
-      -3.2 * smoothWindow(z, -102, -112, 3)
-    // No sweep in the side gallery: you arrive there and look around yourself.
-    look.current.set(ahead.cx + sweep, EYE - 0.06, aheadZ)
-    if (leanTarget) {
-      look.current.lerp(leanTarget, frame.focusAmount * (portrait ? 0.88 : 0.62))
-    }
+    look.current.set(hallAt(aheadZ).cx, EYE, aheadZ)
 
     // --- dollying into an open case study -----------------------------------
     const wantDolly = open && openPanel ? 1 : 0
@@ -168,22 +126,21 @@ export default function Rig({ quality }) {
     if (!Number.isFinite(camera.position.x + camera.position.y + camera.position.z)) {
       camera.position.copy(pos.current)
     }
-    camera.position.lerp(pos.current, 1 - Math.exp(-14 * dt))
+    // Set, not eased. The scroll itself is already damped, so a second easing
+    // here only made the camera lag the centre line — drifting more than a
+    // metre off it through the bend and then sliding back, which is precisely
+    // the swimming feeling we are removing.
+    camera.position.copy(pos.current)
     camera.lookAt(look.current)
 
-    // --- turning your head ---------------------------------------------------
-    // A drag holds where you put it so you can actually read an engraving, and
-    // only recentres once you start walking again. Moving the pointer adds a
-    // gentler look on top, so the room responds even without dragging.
-    if (!frame.dragging) {
-      const recentre = Math.min(6, speed * 55)
-      frame.dragYaw = damp(frame.dragYaw, 0, recentre, dt)
-      frame.dragPitch = damp(frame.dragPitch, 0, recentre, dt)
-    }
-    const wantYaw = frame.dragYaw - frame.mx * 0.3 * orbit
-    const wantPitch = frame.dragPitch - frame.my * 0.13 * orbit
-    yaw.current = damp(yaw.current, wantYaw, 9, dt)
-    pitch.current = damp(pitch.current, wantPitch, 9, dt)
+    /* --- turning your head -------------------------------------------------
+     *
+     * The drag, and nothing else. Where you leave it is where it stays: no
+     * spring back to centre, and no drift from where the mouse happens to be
+     * hovering. Move the mouse without holding it and the room does not budge.
+     */
+    yaw.current = damp(yaw.current, frame.dragYaw, 11, dt)
+    pitch.current = damp(pitch.current, frame.dragPitch, 11, dt)
     // Applied after lookAt so the walk still aims down the hall underneath.
     camera.rotateY(yaw.current)
     camera.rotateX(pitch.current)

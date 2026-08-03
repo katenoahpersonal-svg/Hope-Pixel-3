@@ -24,7 +24,8 @@ const SPOTS = [
   { z: -88.5, side: -1 },
   { z: -88.5, side: 1 },
 ]
-const OFFSET = 3.7
+/** Close enough to the walkway to be in front of you as you approach. */
+const OFFSET = 3.1
 
 function Specimen({ kind, metal, hover }) {
   const ref = useRef()

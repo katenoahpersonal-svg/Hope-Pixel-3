@@ -57,21 +57,29 @@ export const hallProfile = [
   //  z     cx    hw    h
   [  20,   0,   8.6,  7.0], // entrance hall
   [   6,   0,   8.6,  7.0],
-  [  -1,   0,   6.9,  6.0], // portal into the gallery
-  [  -4,   0,   6.9,  6.0],
-  [ -50,   0,   6.9,  6.0], // main gallery corridor
+  // Narrower than it was. Now that the camera walks dead straight instead of
+  // leaning toward each panel, the walls have to come close enough that the
+  // work is in front of you on the approach rather than out at the edge of
+  // vision.
+  [  -1,   0,   5.6,  6.0], // portal into the gallery
+  [  -4,   0,   5.6,  6.0],
+  [ -50,   0,   5.6,  6.0], // main gallery corridor
   [ -58,   0,   9.0,  6.8],
   [ -66,   0,   9.6,  7.0], // studio tour (about)
   [ -72,   0,   9.4,  7.0],
   [ -74,   0,   8.2,  6.6],
   [ -80,   0,  11.2,  8.0], // expertise alcove
   [ -90,   0,  11.2,  8.0],
-  [ -96,   0,   7.0,  6.2],
-  [-100,   0,   6.9,  6.0], // records — résumé
+  [ -96,   0,   6.0,  6.2],
+  [-100,   0,   5.8,  6.0], // records — résumé
   [-106,   0,   9.2,  6.8], // contact — the quiet room
   [-115,   0,   9.2,  6.8],
-  [-121,   6,   7.2,  6.2], // the hall bends
-  [-124,  13,   4.9,  6.4], // studio work — a room to stand in, not a passage
+  // The turn, spread over ten metres rather than three. A tighter corner swung
+  // the walking line sideways faster than it moved forward, which reads as
+  // being shoved rather than walking round.
+  [-119,   3,   8.2,  6.6], // the hall begins to bend
+  [-124,   9,   6.4,  6.5],
+  [-127,  13,   4.9,  6.4], // studio work — a room to stand in, not a passage
   [-152,  13,   4.9,  6.4],
 ]
 
