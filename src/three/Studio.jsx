@@ -6,7 +6,7 @@ import { useStore } from '../state/store'
  * The whole 3D gallery behind one lazy import, so a visitor on the flat layout
  * — reduced motion, or no WebGL — never downloads three.js at all.
  */
-export default function Studio({ onCreated }) {
+export default function Studio({ onCreated, onError }) {
   const quality = useStore((s) => s.quality)
 
   return (
@@ -33,8 +33,9 @@ export default function Studio({ onCreated }) {
          eye than about a metre here, so the near plane can afford to move out. */
       camera={{ fov: 48, near: 0.35, far: 200, position: [0, 1.62, 14] }}
       onCreated={onCreated}
+      onError={onError}
     >
-      <Scene />
+      <Scene onError={onError} />
     </Stage>
   )
 }

@@ -33,7 +33,7 @@ const DRIVE = new URLSearchParams(window.location.search).has('drive')
  * along. The watchdog restarts it if it ever stops, so a lost WebGL context or
  * a throw inside a frame callback cannot end the session.
  */
-function Frameloop() {
+function Frameloop({ onError }) {
   const advance = useThree((s) => s.advance)
 
   useEffect(() => {
@@ -41,6 +41,7 @@ function Frameloop() {
     let raf = 0
     let alive = true
     let beat = 0
+    let failures = 0
 
     const tick = (t) => {
       if (!alive) return
@@ -49,7 +50,19 @@ function Frameloop() {
       raf = requestAnimationFrame(tick)
       beat++
       window.__frames = beat
-      advance(t)
+      try {
+        // R3F's manual clock uses seconds; RAF timestamps are milliseconds.
+        advance(t / 1000)
+        failures = 0
+      } catch (error) {
+        failures++
+        if (failures === 1) console.error('A 3D frame failed.', error)
+        if (failures >= 3) {
+          alive = false
+          cancelAnimationFrame(raf)
+          onError?.(error)
+        }
+      }
     }
     raf = requestAnimationFrame(tick)
 
@@ -68,7 +81,7 @@ function Frameloop() {
       cancelAnimationFrame(raf)
       clearInterval(watchdog)
     }
-  }, [advance])
+  }, [advance, onError])
 
   return null
 }
@@ -83,61 +96,109 @@ const TEXTURE_SLOTS = [
   'aoMap',
 ]
 
-/**
- * Push every texture and every shader onto the GPU before the loader retires.
- *
- * Otherwise each one is uploaded the first time its object enters the view —
- * a 1024×1280 canvas texture plus mipmaps, or a fresh shader program, in the
- * middle of a frame. That is a 100ms stall, and walking the hall hits a fresh
- * one every few metres, which is exactly what "getting stuck" feels like.
- */
-async function warmUp(gl, scene, camera) {
+const pause = () =>
+  new Promise((resolve) => {
+    // requestIdleCallback is ideal, but Safari does not provide it. A short
+    // timer still yields the main thread so input, paint and the render loop
+    // can run between uploads.
+    if ('requestIdleCallback' in window) {
+      window.requestIdleCallback(() => resolve(), { timeout: 120 })
+    } else {
+      setTimeout(resolve, 16)
+    }
+  })
+
+const timeout = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
+
+function sceneTextures(scene) {
   const seen = new Set()
-  scene.traverse((o) => {
-    const mats = Array.isArray(o.material) ? o.material : o.material ? [o.material] : []
-    for (const m of mats) {
+  const textures = []
+  scene.traverse((object) => {
+    const materials = Array.isArray(object.material)
+      ? object.material
+      : object.material
+        ? [object.material]
+        : []
+
+    for (const material of materials) {
       for (const slot of TEXTURE_SLOTS) {
-        const tex = m[slot]
-        if (tex?.isTexture && !seen.has(tex.uuid)) {
-          seen.add(tex.uuid)
-          try {
-            gl.initTexture(tex)
-          } catch {
-            /* a texture that will not preload is not worth failing the load for */
-          }
+        const texture = material[slot]
+        if (texture?.isTexture && !seen.has(texture.uuid)) {
+          seen.add(texture.uuid)
+          textures.push(texture)
         }
       }
     }
   })
-  try {
-    if (gl.compileAsync) await gl.compileAsync(scene, camera)
-    else gl.compile(scene, camera)
-  } catch {
-    /* ditto for shader precompilation */
+  return textures
+}
+
+/**
+ * Warm optional GPU resources without ever holding the entrance hostage.
+ *
+ * The old version called initTexture() for every large canvas texture in one
+ * uninterrupted loop while the loader sat at 88%. On integrated graphics that
+ * can monopolise the main thread for many seconds, so even the six-second
+ * watchdog cannot fire. Uploading a few resources only when the browser is idle
+ * keeps the room responsive and lets slower devices enter immediately.
+ */
+async function warmUp(gl, scene, camera, quality, cancelled) {
+  await pause()
+  if (cancelled()) return
+
+  // Shader compilation is useful, but it is a background optimisation, not a
+  // requirement. Never wait indefinitely for a driver to report completion.
+  if (quality === 'high' && typeof gl.compileAsync === 'function') {
+    try {
+      await Promise.race([gl.compileAsync(scene, camera), timeout(1800)])
+    } catch {
+      /* A shader that will not precompile can still compile on first use. */
+    }
   }
-  return seen.size
+
+  const textures = sceneTextures(scene)
+  const limit = quality === 'high' ? textures.length : quality === 'mid' ? 10 : 0
+
+  for (let i = 0; i < limit; i++) {
+    if (cancelled()) return
+    try {
+      gl.initTexture(textures[i])
+    } catch {
+      /* A texture that will not preload is not worth failing the session for. */
+    }
+    await pause()
+  }
 }
 
 /** Reports the first real frames so the loader can retire honestly. */
 function Ready() {
   const frames = useRef(0)
-  const warmed = useRef(false)
+  const started = useRef(false)
+  const cancelled = useRef(false)
+  const timer = useRef(0)
   const setProgress = useStore((s) => s.setProgress)
   const setReady = useStore((s) => s.setReady)
+  const quality = useStore((s) => s.quality)
   const gl = useThree((s) => s.gl)
   const advance = useThree((s) => s.advance)
   const camera = useThree((s) => s.camera)
   const scene = useThree((s) => s.scene)
 
   useEffect(() => {
-    // Development hooks. __drive steps the frameloop by hand, which is the only
-    // way to get a frame out of a tab that receives no animation frames (a
-    // backgrounded preview pane); __probe is for poking at the scene from a
-    // console.
+    // Development hooks. advance() in frameloop="never" expects seconds,
+    // whereas requestAnimationFrame/performance.now() report milliseconds.
     window.__probe = { camera, scene, gl }
     window.__drive = (n = 1, dt = 1 / 60) => {
-      for (let i = 0; i < n; i++) advance(performance.now() + i * dt * 1000)
+      const start = performance.now() / 1000
+      for (let i = 0; i < n; i++) advance(start + i * dt)
       return n
+    }
+
+    return () => {
+      cancelled.current = true
+      clearTimeout(timer.current)
+      delete window.__probe
+      delete window.__drive
     }
   }, [advance, gl, camera, scene])
 
@@ -147,15 +208,16 @@ function Ready() {
       setProgress(70 + frames.current * 5)
       return
     }
-    // One frame has been drawn, so the scene graph is complete — warm it, then
-    // let the loader go.
-    if (warmed.current) return
-    warmed.current = true
-    setProgress(88)
-    warmUp(gl, scene, camera).then(() => {
-      setProgress(100)
-      setReady()
-    })
+    if (started.current) return
+    started.current = true
+
+    // Four actual frames are enough to prove the room is alive. Let the visitor
+    // in now; texture/shader warming continues gently in the background.
+    setProgress(100)
+    setReady()
+    timer.current = window.setTimeout(() => {
+      void warmUp(gl, scene, camera, quality, () => cancelled.current)
+    }, 250)
   })
 
   return null
@@ -193,12 +255,11 @@ function Ready() {
  * any remaining report of slowness mean something.
  */
 function FpsMeter() {
-  const frameloop = useThree((s) => s.frameloop)
   const acc = useRef({ elapsed: 0, frames: 0 })
 
   useFrame((_, delta) => {
     // Hand-stepped frames say nothing about real performance.
-    if (frameloop === 'never') return
+    if (DRIVE) return
     // A delta over a second means the tab was backgrounded, not a frame rate.
     if (!Number.isFinite(delta) || delta > 1) return
     const a = acc.current
@@ -213,7 +274,7 @@ function FpsMeter() {
   return null
 }
 
-export default function Scene() {
+export default function Scene({ onError }) {
   const palette = useStore((s) => s.palette)
   const quality = useStore((s) => s.quality)
 
@@ -231,7 +292,7 @@ export default function Scene() {
 
       <Rig />
       <Effects palette={palette} quality={quality} />
-      <Frameloop />
+      <Frameloop onError={onError} />
       <FpsMeter />
       <Ready />
     </>

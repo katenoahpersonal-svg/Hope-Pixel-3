@@ -16,7 +16,7 @@ extend(THREE)
  * everything inside it, so the scene takes its state from the store instead of
  * from props threaded down through here.
  */
-export default function Stage({ children, frameloop = 'always', onCreated, ...config }) {
+export default function Stage({ children, frameloop = 'always', onCreated, onError, ...config }) {
   const canvasRef = useRef(null)
 
   useLayoutEffect(() => {
@@ -24,6 +24,9 @@ export default function Stage({ children, frameloop = 'always', onCreated, ...co
     if (!canvas) return
 
     const root = createRoot(canvas)
+    let disposed = false
+    let raf = 0
+
     const size = () => ({
       width: Math.max(1, window.innerWidth),
       height: Math.max(1, window.innerHeight),
@@ -31,21 +34,58 @@ export default function Stage({ children, frameloop = 'always', onCreated, ...co
       left: 0,
     })
 
-    root.configure({ ...config, frameloop, events, size: size(), onCreated })
-    root.render(children)
+    const report = (error) => {
+      if (disposed) return
+      console.error('The 3D studio could not start.', error)
+      onError?.(error)
+    }
 
-    let raf = 0
+    const configure = (includeCreated = false) =>
+      root.configure({
+        ...config,
+        frameloop,
+        events,
+        size: size(),
+        ...(includeCreated ? { onCreated } : null),
+      })
+
+    /**
+     * R3F 9's configure() is asynchronous. render() currently queues behind it,
+     * but awaiting it explicitly prevents overlapping setup/resize work and,
+     * most importantly, gives us somewhere to catch renderer failures.
+     */
+    const initialize = async () => {
+      try {
+        await configure(true)
+        if (!disposed) root.render(children)
+      } catch (error) {
+        report(error)
+      }
+    }
+    void initialize()
+
     const resize = () => {
       cancelAnimationFrame(raf)
-      raf = requestAnimationFrame(() => root.configure({ ...config, frameloop, events, size: size() }))
+      raf = requestAnimationFrame(() => {
+        void configure().catch(report)
+      })
     }
+
+    const contextLost = (event) => {
+      event.preventDefault()
+      report(new Error('The browser lost the WebGL rendering context.'))
+    }
+
     window.addEventListener('resize', resize)
     window.addEventListener('orientationchange', resize)
+    canvas.addEventListener('webglcontextlost', contextLost, false)
 
     return () => {
+      disposed = true
       cancelAnimationFrame(raf)
       window.removeEventListener('resize', resize)
       window.removeEventListener('orientationchange', resize)
+      canvas.removeEventListener('webglcontextlost', contextLost, false)
       root.unmount()
     }
     // Mounted once on purpose — see the note above.

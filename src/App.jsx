@@ -1,4 +1,4 @@
-import { Suspense, lazy, useEffect, useMemo, useState } from 'react'
+import { Suspense, lazy, useCallback, useEffect, useMemo, useState } from 'react'
 import Loader from './ui/Loader'
 import Nav from './ui/Nav'
 import Overlays, { DepthRail } from './ui/Overlays'
@@ -33,13 +33,26 @@ export default function App() {
   const setHour = useStore((s) => s.setHour)
 
   const [fontsReady, setFontsReady] = useState(false)
+  const [studioFailed, setStudioFailed] = useState(false)
 
-  const flat = useMemo(() => {
+  const hardwareFlat = useMemo(() => {
     if (params.get('flat') === '1') return true
     if (params.get('flat') === '0') return false
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     return reduce || !webglAvailable()
   }, [])
+  const flat = hardwareFlat || studioFailed
+
+  const handleStudioError = useCallback(
+    (error) => {
+      console.error('Switching to the lightweight portfolio after a 3D error.', error)
+      setStudioFailed(true)
+      setProgress(100)
+      setReady()
+      requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: 'auto' }))
+    },
+    [setProgress, setReady]
+  )
 
   /* --- theme the interface to match the light in the room ---------------- */
   useEffect(() => {
@@ -177,13 +190,14 @@ export default function App() {
       setReady()
       return
     }
+    if (ready) return
+
     setProgress(55)
     const watchdog = setTimeout(() => {
-      setProgress(100)
-      setReady()
-    }, 6000)
+      handleStudioError(new Error('The 3D studio did not produce a usable frame in time.'))
+    }, 10000)
     return () => clearTimeout(watchdog)
-  }, [flat, setProgress, setReady])
+  }, [flat, ready, setProgress, setReady, handleStudioError])
 
   /* --- keyboard: 1-8 open a case study, Home/End jump --------------------- */
   useEffect(() => {
@@ -221,7 +235,7 @@ export default function App() {
       <div className="stage">
         {fontsReady && (
           <Suspense fallback={null}>
-            <Studio onCreated={() => setProgress(65)} />
+            <Studio onCreated={() => setProgress(65)} onError={handleStudioError} />
           </Suspense>
         )}
       </div>

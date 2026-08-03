@@ -12,7 +12,7 @@ export function goToSection(id, opts = {}) {
     anchor.scrollIntoView({ behavior: 'smooth', block: 'start' })
     return
   }
-  scrollToT(zToT(s.z), { duration: 2.2, ...opts })
+  scrollToT(zToT(s.z), { duration: 1100, ...opts })
 }
 
 /** Where a project's panel hangs, as scroll progress. */
@@ -47,7 +47,7 @@ export function openStudy(id, { approach = true } = {}) {
 
   if (!approach) return finish()
 
-  scrollToT(progressForProject(id), { duration: 1.5 })
+  scrollToT(progressForProject(id), { duration: 900 })
   // Give the walk a moment, then dolly in.
   clearTimeout(openStudy._timer)
   openStudy._timer = setTimeout(finish, store.open ? 120 : 620)
