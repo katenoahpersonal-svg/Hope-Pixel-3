@@ -17,3 +17,11 @@ This version fixes the portfolio stalls without changing the visual design.
 Commit the contents of this folder to the repository's `main` branch. The existing GitHub Pages workflow runs `npm ci`, builds the Vite project, and deploys `dist` automatically.
 
 The generated `dist`, local `node_modules`, development screenshots, and Git history are intentionally excluded from this ZIP.
+
+## Follow-up polish
+
+- Closing a case study now releases the scroll/camera immediately and explicitly restarts the 3D frame loop.
+- Switching between studies replaces the current history entry instead of stacking dialogs behind the Close button.
+- The warm cove atmosphere now continues through the full gallery with a lightweight global halo and slightly stronger ambient fill.
+- A compact Katelynn Noah signature now balances the empty lower-right area of the entrance on desktop.
+- Studio Tour chapter markers now face inward toward the visitor, fixing the clipped backwards lettering (the final marker reads “Leadership”).

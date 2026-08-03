@@ -1,4 +1,4 @@
-import { scrollToT } from './scroll'
+import { scrollToT, cancelTravel, lockScroll } from './scroll'
 import { useStore } from '../state/store'
 import { sections, zToT, panelPlacement, featured, projects } from '../data/content'
 import { click as clickSound } from './audio'
@@ -41,7 +41,14 @@ export function openStudy(id, { approach = true } = {}) {
   clickSound()
 
   const finish = () => {
-    if (history.state?.study !== id) history.pushState({ study: id }, '', `#${id}`)
+    const current = useStore.getState().open
+    // Opening another project from inside an existing study should replace the
+    // current dialog entry, not build a stack of studies that the Close button
+    // then has to walk backwards through.
+    if (history.state?.study !== id) {
+      const method = current && history.state?.study ? 'replaceState' : 'pushState'
+      history[method]({ study: id }, '', `#${id}`)
+    }
     useStore.getState().openProject(id)
   }
 
@@ -55,10 +62,29 @@ export function openStudy(id, { approach = true } = {}) {
 
 export function closeStudy() {
   clearTimeout(openStudy._timer)
-  if (history.state?.study) history.back()
-  else {
-    history.replaceState(null, '', window.location.pathname + window.location.search)
-    useStore.getState().closeProject()
+  cancelTravel()
+
+  // Release the UI and the camera immediately. Waiting exclusively for the
+  // asynchronous popstate event can leave the room locked and the renderer at
+  // its close-up camera position on some browsers.
+  useStore.getState().closeProject()
+  lockScroll(false)
+  window.dispatchEvent(new Event('studio:resume'))
+
+  const cleanUrl = window.location.pathname + window.location.search
+  if (history.state?.study) {
+    history.back()
+    // A guarded fallback for browsers/extensions that delay or suppress the
+    // same-document popstate event. It also wakes a RAF chain that was paused
+    // while the dialog owned focus.
+    window.setTimeout(() => {
+      if (history.state?.study) history.replaceState(null, '', cleanUrl)
+      useStore.getState().closeProject()
+      lockScroll(false)
+      window.dispatchEvent(new Event('studio:resume'))
+    }, 180)
+  } else {
+    history.replaceState(null, '', cleanUrl)
   }
 }
 
@@ -68,6 +94,10 @@ export function bindHistory() {
     const id = history.state?.study || null
     const store = useStore.getState()
     if (id !== store.open) (id ? store.openProject(id) : store.closeProject())
+    if (!id) {
+      lockScroll(false)
+      window.dispatchEvent(new Event('studio:resume'))
+    }
   }
   window.addEventListener('popstate', sync)
   return () => window.removeEventListener('popstate', sync)

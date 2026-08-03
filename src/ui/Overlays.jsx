@@ -72,6 +72,14 @@ function Home({ show }) {
         </div>
       </div>
 
+      <div className="home__signature panelfade" data-show={show} aria-hidden="true">
+        <span className="home__signature-mark">KN</span>
+        <span className="home__signature-copy">
+          <strong>{identity.name}</strong>
+          <small>Multidisciplinary designer · ecommerce · creative production</small>
+        </span>
+      </div>
+
       <div className="scrollhint panelfade" data-show={show} aria-hidden="true">
         <span className="scrollhint__line" />
         <span>Scroll</span>

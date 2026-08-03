@@ -259,7 +259,7 @@ function ChapterMarker({ chapter, z, side, index, palette }) {
   const H = 2.5
 
   return (
-    <group position={[cx + side * 3.5, 0, z]} rotation={[0, side * 0.42, 0]}>
+    <group position={[cx + side * 3.5, 0, z]} rotation={[0, -side * 0.42, 0]}>
       <mesh position={[0, H / 2 + 0.5, -0.06]} castShadow receiveShadow>
         <boxGeometry args={[W + 0.5, H + 1, 0.12]} />
         <meshStandardMaterial color={palette.wall} roughness={0.93} metalness={0} envMapIntensity={0.6} />

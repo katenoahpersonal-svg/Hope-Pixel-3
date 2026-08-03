@@ -916,3 +916,80 @@ body.is-turning .stage canvas { cursor: grabbing; }
 @media (prefers-reduced-motion: reduce) {
   * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }
+
+/* ==================================================================
+   Warm light + opening signature
+   ================================================================== */
+
+/* A very light screen-space halo keeps the warm studio atmosphere present in
+   every room without adding another expensive real-time light to every mesh. */
+.global-glow {
+  position: fixed;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 72% 42% at 50% -4%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 72%),
+    radial-gradient(ellipse 42% 34% at 72% 92%, color-mix(in srgb, var(--accent) 11%, transparent), transparent 76%);
+  mix-blend-mode: screen;
+  opacity: 0.55;
+  animation: studio-glow-breathe 8s ease-in-out infinite alternate;
+}
+
+:root[data-dark='false'] .global-glow { opacity: 0.24; }
+
+@keyframes studio-glow-breathe {
+  from { filter: brightness(0.92); transform: scale(1); }
+  to { filter: brightness(1.08); transform: scale(1.025); }
+}
+
+.home__signature {
+  position: fixed;
+  right: calc(var(--gut) + 1.4rem);
+  bottom: calc(var(--gut) * 1.45);
+  z-index: 15;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.85rem;
+  max-width: min(24rem, 34vw);
+  text-align: right;
+  text-shadow: 0 0 28px color-mix(in srgb, var(--accent) 28%, transparent);
+}
+
+.home__signature-mark {
+  font-family: var(--display);
+  font-size: clamp(1.8rem, 3vw, 2.8rem);
+  line-height: 1;
+  color: var(--accent);
+  border-right: 1px solid color-mix(in srgb, var(--accent) 48%, transparent);
+  padding-right: 0.85rem;
+}
+
+.home__signature-copy {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.home__signature-copy strong {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: clamp(1.25rem, 2vw, 1.75rem);
+  line-height: 1;
+}
+
+.home__signature-copy small {
+  color: var(--muted);
+  font-size: 0.58rem;
+  letter-spacing: 0.13em;
+  line-height: 1.45;
+  text-transform: uppercase;
+}
+
+@media (max-width: 1080px) {
+  .home__signature { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .global-glow { animation: none; }
+}

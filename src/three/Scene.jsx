@@ -64,22 +64,34 @@ function Frameloop({ onError }) {
         }
       }
     }
+
+    const restart = () => {
+      if (!alive || document.hidden) return
+      cancelAnimationFrame(raf)
+      raf = requestAnimationFrame(tick)
+    }
+
     raf = requestAnimationFrame(tick)
+    window.addEventListener('studio:resume', restart)
+    window.addEventListener('focus', restart)
+    window.addEventListener('pageshow', restart)
+    document.addEventListener('visibilitychange', restart)
 
     let seen = -1
     const watchdog = setInterval(() => {
       if (document.hidden) return
-      if (beat === seen) {
-        cancelAnimationFrame(raf)
-        raf = requestAnimationFrame(tick)
-      }
+      if (beat === seen) restart()
       seen = beat
-    }, 2000)
+    }, 1500)
 
     return () => {
       alive = false
       cancelAnimationFrame(raf)
       clearInterval(watchdog)
+      window.removeEventListener('studio:resume', restart)
+      window.removeEventListener('focus', restart)
+      window.removeEventListener('pageshow', restart)
+      document.removeEventListener('visibilitychange', restart)
     }
   }, [advance, onError])
 

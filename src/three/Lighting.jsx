@@ -150,7 +150,7 @@ export default function Lighting({ palette, quality }) {
       <Environment
         resolution={256}
         frames={1}
-        environmentIntensity={palette.env}
+        environmentIntensity={palette.env * 1.08}
         // Re-bakes only when the nearest phase actually changes. Keying on the
         // blend amount re-rendered the cube map several times per transition,
         // and each bake is six scene renders.
@@ -166,7 +166,7 @@ export default function Lighting({ palette, quality }) {
         <Lightformer form="rect" intensity={0.4} color={palette.floor} scale={[14, 14, 1]} position={[0, -3, 0]} rotation={[-Math.PI / 2, 0, 0]} />
       </Environment>
 
-      <hemisphereLight args={[palette.sky, palette.ground, palette.ambient]} />
+      <hemisphereLight args={[palette.sky, palette.ground, palette.ambient * 1.2]} />
 
       {COVE_OFFSETS.map((off, i) => (
         <pointLight
@@ -175,7 +175,7 @@ export default function Lighting({ palette, quality }) {
           color={palette.cove}
           // Two lamps doing the work of three, so each carries more and reaches
           // further before it falls off.
-          intensity={palette.coveIntensity * (i === 0 ? 46 : 38)}
+          intensity={palette.coveIntensity * (i === 0 ? 50 : 42)}
           distance={44}
           decay={1.15}
         />

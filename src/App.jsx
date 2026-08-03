@@ -240,6 +240,8 @@ export default function App() {
         )}
       </div>
 
+      <div className="global-glow" aria-hidden="true" />
+
       <div className="chrome">
         <Nav />
         <DepthRail />
