@@ -1,0 +1,276 @@
+--- a/FIX_NOTES.md
++++ b/FIX_NOTES.md
+@@ -17,3 +17,11 @@
+ Commit the contents of this folder to the repository's `main` branch. The existing GitHub Pages workflow runs `npm ci`, builds the Vite project, and deploys `dist` automatically.
+ 
+ The generated `dist`, local `node_modules`, development screenshots, and Git history are intentionally excluded from this ZIP.
++
++## Follow-up polish
++
++- Closing a case study now releases the scroll/camera immediately and explicitly restarts the 3D frame loop.
++- Switching between studies replaces the current history entry instead of stacking dialogs behind the Close button.
++- The warm cove atmosphere now continues through the full gallery with a lightweight global halo and slightly stronger ambient fill.
++- A compact Katelynn Noah signature now balances the empty lower-right area of the entrance on desktop.
++- Studio Tour chapter markers now face inward toward the visitor, fixing the clipped backwards lettering (the final marker reads “Leadership”).
+--- a/src/App.jsx
++++ b/src/App.jsx
+@@ -240,6 +240,8 @@
+         )}
+       </div>
+ 
++      <div className="global-glow" aria-hidden="true" />
++
+       <div className="chrome">
+         <Nav />
+         <DepthRail />
+--- a/src/lib/navigate.js
++++ b/src/lib/navigate.js
+@@ -1,4 +1,4 @@
+-import { scrollToT } from './scroll'
++import { scrollToT, cancelTravel, lockScroll } from './scroll'
+ import { useStore } from '../state/store'
+ import { sections, zToT, panelPlacement, featured, projects } from '../data/content'
+ import { click as clickSound } from './audio'
+@@ -41,7 +41,14 @@
+   clickSound()
+ 
+   const finish = () => {
+-    if (history.state?.study !== id) history.pushState({ study: id }, '', `#${id}`)
++    const current = useStore.getState().open
++    // Opening another project from inside an existing study should replace the
++    // current dialog entry, not build a stack of studies that the Close button
++    // then has to walk backwards through.
++    if (history.state?.study !== id) {
++      const method = current && history.state?.study ? 'replaceState' : 'pushState'
++      history[method]({ study: id }, '', `#${id}`)
++    }
+     useStore.getState().openProject(id)
+   }
+ 
+@@ -55,10 +62,29 @@
+ 
+ export function closeStudy() {
+   clearTimeout(openStudy._timer)
+-  if (history.state?.study) history.back()
+-  else {
+-    history.replaceState(null, '', window.location.pathname + window.location.search)
+-    useStore.getState().closeProject()
++  cancelTravel()
++
++  // Release the UI and the camera immediately. Waiting exclusively for the
++  // asynchronous popstate event can leave the room locked and the renderer at
++  // its close-up camera position on some browsers.
++  useStore.getState().closeProject()
++  lockScroll(false)
++  window.dispatchEvent(new Event('studio:resume'))
++
++  const cleanUrl = window.location.pathname + window.location.search
++  if (history.state?.study) {
++    history.back()
++    // A guarded fallback for browsers/extensions that delay or suppress the
++    // same-document popstate event. It also wakes a RAF chain that was paused
++    // while the dialog owned focus.
++    window.setTimeout(() => {
++      if (history.state?.study) history.replaceState(null, '', cleanUrl)
++      useStore.getState().closeProject()
++      lockScroll(false)
++      window.dispatchEvent(new Event('studio:resume'))
++    }, 180)
++  } else {
++    history.replaceState(null, '', cleanUrl)
+   }
+ }
+ 
+@@ -68,6 +94,10 @@
+     const id = history.state?.study || null
+     const store = useStore.getState()
+     if (id !== store.open) (id ? store.openProject(id) : store.closeProject())
++    if (!id) {
++      lockScroll(false)
++      window.dispatchEvent(new Event('studio:resume'))
++    }
+   }
+   window.addEventListener('popstate', sync)
+   return () => window.removeEventListener('popstate', sync)
+--- a/src/styles/app.css
++++ b/src/styles/app.css
+@@ -916,3 +916,80 @@
+ @media (prefers-reduced-motion: reduce) {
+   * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+ }
++
++/* ==================================================================
++   Warm light + opening signature
++   ================================================================== */
++
++/* A very light screen-space halo keeps the warm studio atmosphere present in
++   every room without adding another expensive real-time light to every mesh. */
++.global-glow {
++  position: fixed;
++  inset: 0;
++  z-index: 4;
++  pointer-events: none;
++  background:
++    radial-gradient(ellipse 72% 42% at 50% -4%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 72%),
++    radial-gradient(ellipse 42% 34% at 72% 92%, color-mix(in srgb, var(--accent) 11%, transparent), transparent 76%);
++  mix-blend-mode: screen;
++  opacity: 0.55;
++  animation: studio-glow-breathe 8s ease-in-out infinite alternate;
++}
++
++:root[data-dark='false'] .global-glow { opacity: 0.24; }
++
++@keyframes studio-glow-breathe {
++  from { filter: brightness(0.92); transform: scale(1); }
++  to { filter: brightness(1.08); transform: scale(1.025); }
++}
++
++.home__signature {
++  position: fixed;
++  right: calc(var(--gut) + 1.4rem);
++  bottom: calc(var(--gut) * 1.45);
++  z-index: 15;
++  display: flex;
++  align-items: center;
++  justify-content: flex-end;
++  gap: 0.85rem;
++  max-width: min(24rem, 34vw);
++  text-align: right;
++  text-shadow: 0 0 28px color-mix(in srgb, var(--accent) 28%, transparent);
++}
++
++.home__signature-mark {
++  font-family: var(--display);
++  font-size: clamp(1.8rem, 3vw, 2.8rem);
++  line-height: 1;
++  color: var(--accent);
++  border-right: 1px solid color-mix(in srgb, var(--accent) 48%, transparent);
++  padding-right: 0.85rem;
++}
++
++.home__signature-copy {
++  display: grid;
++  gap: 0.15rem;
++}
++
++.home__signature-copy strong {
++  font-family: var(--display);
++  font-weight: 400;
++  font-size: clamp(1.25rem, 2vw, 1.75rem);
++  line-height: 1;
++}
++
++.home__signature-copy small {
++  color: var(--muted);
++  font-size: 0.58rem;
++  letter-spacing: 0.13em;
++  line-height: 1.45;
++  text-transform: uppercase;
++}
++
++@media (max-width: 1080px) {
++  .home__signature { display: none; }
++}
++
++@media (prefers-reduced-motion: reduce) {
++  .global-glow { animation: none; }
++}
+--- a/src/three/Lighting.jsx
++++ b/src/three/Lighting.jsx
+@@ -150,7 +150,7 @@
+       <Environment
+         resolution={256}
+         frames={1}
+-        environmentIntensity={palette.env}
++        environmentIntensity={palette.env * 1.08}
+         // Re-bakes only when the nearest phase actually changes. Keying on the
+         // blend amount re-rendered the cube map several times per transition,
+         // and each bake is six scene renders.
+@@ -166,7 +166,7 @@
+         <Lightformer form="rect" intensity={0.4} color={palette.floor} scale={[14, 14, 1]} position={[0, -3, 0]} rotation={[-Math.PI / 2, 0, 0]} />
+       </Environment>
+ 
+-      <hemisphereLight args={[palette.sky, palette.ground, palette.ambient]} />
++      <hemisphereLight args={[palette.sky, palette.ground, palette.ambient * 1.2]} />
+ 
+       {COVE_OFFSETS.map((off, i) => (
+         <pointLight
+@@ -175,7 +175,7 @@
+           color={palette.cove}
+           // Two lamps doing the work of three, so each carries more and reaches
+           // further before it falls off.
+-          intensity={palette.coveIntensity * (i === 0 ? 46 : 38)}
++          intensity={palette.coveIntensity * (i === 0 ? 50 : 42)}
+           distance={44}
+           decay={1.15}
+         />
+--- a/src/three/Scene.jsx
++++ b/src/three/Scene.jsx
+@@ -64,22 +64,34 @@
+         }
+       }
+     }
++
++    const restart = () => {
++      if (!alive || document.hidden) return
++      cancelAnimationFrame(raf)
++      raf = requestAnimationFrame(tick)
++    }
++
+     raf = requestAnimationFrame(tick)
++    window.addEventListener('studio:resume', restart)
++    window.addEventListener('focus', restart)
++    window.addEventListener('pageshow', restart)
++    document.addEventListener('visibilitychange', restart)
+ 
+     let seen = -1
+     const watchdog = setInterval(() => {
+       if (document.hidden) return
+-      if (beat === seen) {
+-        cancelAnimationFrame(raf)
+-        raf = requestAnimationFrame(tick)
+-      }
++      if (beat === seen) restart()
+       seen = beat
+-    }, 2000)
++    }, 1500)
+ 
+     return () => {
+       alive = false
+       cancelAnimationFrame(raf)
+       clearInterval(watchdog)
++      window.removeEventListener('studio:resume', restart)
++      window.removeEventListener('focus', restart)
++      window.removeEventListener('pageshow', restart)
++      document.removeEventListener('visibilitychange', restart)
+     }
+   }, [advance, onError])
+ 
+--- a/src/three/Signage.jsx
++++ b/src/three/Signage.jsx
+@@ -259,7 +259,7 @@
+   const H = 2.5
+ 
+   return (
+-    <group position={[cx + side * 3.5, 0, z]} rotation={[0, side * 0.42, 0]}>
++    <group position={[cx + side * 3.5, 0, z]} rotation={[0, -side * 0.42, 0]}>
+       <mesh position={[0, H / 2 + 0.5, -0.06]} castShadow receiveShadow>
+         <boxGeometry args={[W + 0.5, H + 1, 0.12]} />
+         <meshStandardMaterial color={palette.wall} roughness={0.93} metalness={0} envMapIntensity={0.6} />
+--- a/src/ui/Overlays.jsx
++++ b/src/ui/Overlays.jsx
+@@ -72,6 +72,14 @@
+         </div>
+       </div>
+ 
++      <div className="home__signature panelfade" data-show={show} aria-hidden="true">
++        <span className="home__signature-mark">KN</span>
++        <span className="home__signature-copy">
++          <strong>{identity.name}</strong>
++          <small>Multidisciplinary designer · ecommerce · creative production</small>
++        </span>
++      </div>
++
+       <div className="scrollhint panelfade" data-show={show} aria-hidden="true">
+         <span className="scrollhint__line" />
+         <span>Scroll</span>
