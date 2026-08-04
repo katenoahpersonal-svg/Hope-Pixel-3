@@ -96,10 +96,35 @@ export function scrollToT(t, { immediate = false, duration = 1100 } = {}) {
  * back exactly where you were standing.
  */
 export function lockScroll(on) {
-  if (locked === on) return
-  locked = on
-  if (on) lockedAt = scrollY()
-  else window.scrollTo({ top: lockedAt, behavior: 'auto' })
+  if (locked === on) {
+    if (!on) {
+      frame.vel = 0
+      frame.dolly = 0
+    }
+    return
+  }
+
+  if (on) {
+    cancelTravel()
+    lockedAt = scrollY()
+    locked = true
+    const at = scrollProgress()
+    frame.target = at
+    frame.t = at
+    frame.vel = 0
+    return
+  }
+
+  locked = false
+  window.scrollTo({ top: lockedAt, behavior: 'auto' })
+  const at = Math.min(1, Math.max(0, lockedAt / maxScroll()))
+  // Restore the camera and the document to the same source-of-truth value in
+  // the same tick. Otherwise one stale frame can leave the rig easing toward
+  // the modal's close-up while the page has already returned to the hallway.
+  frame.target = at
+  frame.t = at
+  frame.vel = 0
+  frame.dolly = 0
 }
 
 export function isLocked() {

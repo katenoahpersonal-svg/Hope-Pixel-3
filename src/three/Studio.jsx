@@ -13,13 +13,12 @@ export default function Studio({ onCreated, onError }) {
     <Stage
       // This scene is fill-rate bound, so pixel count is the single biggest
       // lever there is. 1.5 on a 1280-wide window is already 2.6 megapixels.
-      dpr={[1, quality === 'high' ? 1.5 : quality === 'mid' ? 1.25 : 1]}
+      dpr={quality === 'high' ? [1, 1.25] : quality === 'mid' ? 1 : 0.85}
       shadows={quality === 'high'}
-      // Always 'never': the Frameloop component in Scene.jsx drives advance()
-      // itself. Leaving R3F to run its own loop on a hand-mounted root is the
-      // one thing a hidden preview pane can never verify, because it issues no
-      // animation frames at all.
-      frameloop="never"
+      // Use React Three Fiber's native animation loop. The manual advance()
+      // loop previously competed with post-processing and could stop after a
+      // compositing stall, leaving the scrollbar moving while the room froze.
+      frameloop="always"
       gl={{
         antialias: false,
         alpha: false,
@@ -35,7 +34,7 @@ export default function Studio({ onCreated, onError }) {
       onCreated={onCreated}
       onError={onError}
     >
-      <Scene onError={onError} />
+      <Scene />
     </Stage>
   )
 }

@@ -218,7 +218,7 @@ export default function CaseStudy() {
     return () => {
       clearTimeout(t)
       document.removeEventListener('keydown', onKey)
-      if (restore.current instanceof HTMLElement) restore.current.focus()
+      if (restore.current instanceof HTMLElement) restore.current.focus({ preventScroll: true })
     }
   }, [open])
 

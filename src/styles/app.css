@@ -690,16 +690,15 @@ body.is-turning .stage canvas { cursor: grabbing; }
    Case study dialog
    ================================================================== */
 
-/* An `opacity: 0` overlay still catches every click and still composites its
-   backdrop-filter. This one is full screen, so without the visibility and
-   pointer-events rules below it silently swallows every interaction on the
+/* An `opacity: 0` overlay still catches every click. This one is full screen,
+   so without the visibility and pointer-events rules below it silently swallows every interaction on the
    page — scrolling keeps working, which makes it look like a freeze rather
    than a hit-testing problem. `visibility` is delayed so the fade still runs. */
 .scrim {
   position: fixed;
   inset: 0;
   z-index: 90;
-  background: color-mix(in srgb, var(--paper) 42%, transparent);
+  background: color-mix(in srgb, var(--paper) 52%, rgba(18, 8, 5, 0.58));
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
@@ -709,8 +708,6 @@ body.is-turning .stage canvas { cursor: grabbing; }
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
-  backdrop-filter: blur(3px);
-  -webkit-backdrop-filter: blur(3px);
   transition: opacity 0.6s, visibility 0s;
 }
 
@@ -724,19 +721,20 @@ body.is-turning .stage canvas { cursor: grabbing; }
   box-shadow: -30px 0 90px -40px rgba(0, 0, 0, 0.5);
   overflow-y: auto;
   overscroll-behavior: contain;
-  transform: translateX(100%);
+  contain: layout paint;
+  backface-visibility: hidden;
+  transform: translate3d(100%, 0, 0);
   /* Same reasoning as .scrim: a parked panel should cost nothing and catch
-     nothing. The blur is only attached while it is actually on screen. */
+     nothing. The old full-height backdrop blur was removed because it could
+     stall Chrome's WebGL compositor when the dialog closed. */
   visibility: hidden;
   pointer-events: none;
   transition: transform 0.85s cubic-bezier(0.16, 1, 0.3, 1), visibility 0s linear 0.85s;
 }
 .study[data-show='true'] {
-  transform: none;
+  transform: translate3d(0, 0, 0);
   visibility: visible;
   pointer-events: auto;
-  backdrop-filter: blur(30px) saturate(1.4);
-  -webkit-backdrop-filter: blur(30px) saturate(1.4);
   transition: transform 0.85s cubic-bezier(0.16, 1, 0.3, 1), visibility 0s;
 }
 .study__inner { padding: clamp(1.6rem, 4vw, 3.4rem); padding-top: 4.6rem; max-width: 40rem; }
@@ -867,7 +865,7 @@ body.is-turning .stage canvas { cursor: grabbing; }
     width: auto;
     top: auto;
     bottom: 1rem;
-    transform: none;
+    transform: translate3d(0, 0, 0);
     max-height: 56vh;
     overflow-y: auto;
   }
@@ -892,7 +890,7 @@ body.is-turning .stage canvas { cursor: grabbing; }
   transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), visibility 0s linear 0.6s;
 }
 .sheet[data-show='true'] {
-  transform: none;
+  transform: translate3d(0, 0, 0);
   visibility: visible;
   pointer-events: auto;
   backdrop-filter: blur(26px);
@@ -921,27 +919,21 @@ body.is-turning .stage canvas { cursor: grabbing; }
    Warm light + opening signature
    ================================================================== */
 
-/* A very light screen-space halo keeps the warm studio atmosphere present in
-   every room without adding another expensive real-time light to every mesh. */
+/* A static screen-space warmth layer supports the real cove geometry without
+   a full-screen blur or animation pass. */
 .global-glow {
   position: fixed;
   inset: 0;
   z-index: 4;
   pointer-events: none;
   background:
-    radial-gradient(ellipse 72% 42% at 50% -4%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 72%),
-    radial-gradient(ellipse 42% 34% at 72% 92%, color-mix(in srgb, var(--accent) 11%, transparent), transparent 76%);
-  mix-blend-mode: screen;
-  opacity: 0.55;
-  animation: studio-glow-breathe 8s ease-in-out infinite alternate;
+    radial-gradient(ellipse 42% 24% at 50% -2%, color-mix(in srgb, var(--accent) 34%, transparent), transparent 76%),
+    radial-gradient(ellipse 18% 50% at 50% 54%, color-mix(in srgb, var(--accent) 13%, transparent), transparent 78%),
+    radial-gradient(ellipse 46% 28% at 50% 103%, color-mix(in srgb, var(--accent) 19%, transparent), transparent 78%);
+  opacity: 0.72;
 }
 
-:root[data-dark='false'] .global-glow { opacity: 0.24; }
-
-@keyframes studio-glow-breathe {
-  from { filter: brightness(0.92); transform: scale(1); }
-  to { filter: brightness(1.08); transform: scale(1.025); }
-}
+:root[data-dark='false'] .global-glow { opacity: 0.34; }
 
 .home__signature {
   position: fixed;
@@ -988,8 +980,4 @@ body.is-turning .stage canvas { cursor: grabbing; }
 
 @media (max-width: 1080px) {
   .home__signature { display: none; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .global-glow { animation: none; }
 }

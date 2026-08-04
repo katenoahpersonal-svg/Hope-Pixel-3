@@ -64,43 +64,35 @@ export function closeStudy() {
   clearTimeout(openStudy._timer)
   cancelTravel()
 
-  // Release the UI and the camera immediately. Waiting exclusively for the
-  // asynchronous popstate event can leave the room locked and the renderer at
-  // its close-up camera position on some browsers.
+  // Close synchronously and clean the current history entry in place. Calling
+  // history.back() here let the browser restore an old scroll position while
+  // the dialog effect was simultaneously unlocking the camera — the exact
+  // race that could leave the scrollbar moving while the room stayed parked.
   useStore.getState().closeProject()
   lockScroll(false)
-  window.dispatchEvent(new Event('studio:resume'))
 
   const cleanUrl = window.location.pathname + window.location.search
-  if (history.state?.study) {
-    history.back()
-    // A guarded fallback for browsers/extensions that delay or suppress the
-    // same-document popstate event. It also wakes a RAF chain that was paused
-    // while the dialog owned focus.
-    window.setTimeout(() => {
-      if (history.state?.study) history.replaceState(null, '', cleanUrl)
-      useStore.getState().closeProject()
-      lockScroll(false)
-      window.dispatchEvent(new Event('studio:resume'))
-    }, 180)
-  } else {
+  if (history.state?.study || window.location.hash) {
     history.replaceState(null, '', cleanUrl)
   }
 }
 
 /** Keep the store in step with the address bar. */
 export function bindHistory() {
+  const previousRestoration = history.scrollRestoration
+  history.scrollRestoration = 'manual'
+
   const sync = () => {
     const id = history.state?.study || null
     const store = useStore.getState()
     if (id !== store.open) (id ? store.openProject(id) : store.closeProject())
-    if (!id) {
-      lockScroll(false)
-      window.dispatchEvent(new Event('studio:resume'))
-    }
+    if (!id) lockScroll(false)
   }
   window.addEventListener('popstate', sync)
-  return () => window.removeEventListener('popstate', sync)
+  return () => {
+    window.removeEventListener('popstate', sync)
+    history.scrollRestoration = previousRestoration
+  }
 }
 
 /** #bigcommerce in the address bar should open that case study on arrival. */

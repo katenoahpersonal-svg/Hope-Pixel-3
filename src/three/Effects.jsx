@@ -12,19 +12,8 @@ import { safeDt, finite } from '../lib/math'
  * the room falls away. Scrolling hard widens the bokeh — motion you feel
  * rather than see.
  */
-export default function Effects({ palette, quality }) {
-  const dof = useRef()
-  const bloom = useRef()
+function RendererSettings({ palette }) {
   const gl = useThree((s) => s.gl)
-  /**
-   * Depth of field is a `high` luxury only.
-   *
-   * It renders the blur at half resolution and composites it over everything,
-   * so on hardware that cannot afford it the result is not "tasteful bokeh" —
-   * it is a scene that looks permanently out of focus while also running
-   * slower. Sharp at 30fps beats soft at 30fps.
-   */
-  const enableDof = quality === 'high'
 
   useEffect(() => {
     gl.toneMapping = THREE.ACESFilmicToneMapping
@@ -34,11 +23,26 @@ export default function Effects({ palette, quality }) {
     gl.toneMappingExposure = palette.exposure
   }, [gl, palette.exposure])
 
+  return null
+}
+
+function HighEffects({ palette }) {
+  const dof = useRef()
+  const bloom = useRef()
+  /**
+   * Depth of field is a `high` luxury only.
+   *
+   * It renders the blur at half resolution and composites it over everything,
+   * so on hardware that cannot afford it the result is not "tasteful bokeh" —
+   * it is a scene that looks permanently out of focus while also running
+   * slower. Sharp at 30fps beats soft at 30fps.
+   */
+
   useEffect(() => {
     // Point the lens at the live focal point; the gallery mutates it in place.
     if (dof.current) dof.current.target = focus.point
     if (typeof window !== 'undefined') window.__fx = { dof, bloom }
-  }, [enableDof])
+  }, [])
 
   useFrame((_, delta) => {
     const dt = safeDt(delta)
@@ -64,21 +68,19 @@ export default function Effects({ palette, quality }) {
 
   return (
     <EffectComposer
-      multisampling={quality === 'high' ? 4 : quality === 'mid' ? 2 : 0}
+      multisampling={2}
       enableNormalPass={false}
     >
       {/* `{cond && <Effect/>}` — never a Fragment. EffectComposer reads its
           children as effects, and React.Children.toArray drops false but keeps
           a Fragment, which breaks the composer when the tier changes. */}
-      {enableDof && (
-        <DepthOfField
-          ref={dof}
-          target={focus.point}
-          worldFocusRange={2.4}
-          bokehScale={1}
-          resolutionScale={quality === 'high' ? 0.75 : 0.5}
-        />
-      )}
+      <DepthOfField
+        ref={dof}
+        target={focus.point}
+        worldFocusRange={2.4}
+        bokehScale={1}
+        resolutionScale={0.65}
+      />
       <Bloom
         ref={bloom}
         intensity={palette.bloom}
@@ -89,5 +91,22 @@ export default function Effects({ palette, quality }) {
       />
       <Vignette offset={0.28} darkness={palette.dark ? 0.62 : 0.4} eskil={false} />
     </EffectComposer>
+  )
+}
+
+
+/**
+ * Post-processing is reserved for discrete-GPU/high quality sessions. On the
+ * mid tier the full-screen composer, bloom pyramid and MSAA render targets
+ * were the largest source of Windows/Chrome WebGL stalls. The room's glow is
+ * now built into the architecture, so the gallery remains luminous without a
+ * second full-screen render pipeline.
+ */
+export default function Effects({ palette, quality }) {
+  return (
+    <>
+      <RendererSettings palette={palette} />
+      {quality === 'high' && <HighEffects palette={palette} />}
+    </>
   )
 }

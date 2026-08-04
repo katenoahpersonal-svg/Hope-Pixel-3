@@ -1,8 +1,8 @@
-import { useMemo, useRef } from 'react'
+import { useMemo } from 'react'
 import * as THREE from 'three'
 import { MeshReflectorMaterial } from '@react-three/drei'
 import { hallAt, Z_START, Z_FAR } from '../data/content'
-import { grainMap } from '../lib/textures'
+import { grainMap, coveGradient } from '../lib/textures'
 
 /**
  * DIMENSION ONE — SPACE.
@@ -156,14 +156,39 @@ function buildGeometry() {
     (i, s) => 0.78 - 0.06 * (1 - s)
   )
 
-  // ---- the cove: a light slot down the centre of the ceiling --------------
-  const cove = strip(
-    spine.map((s) => [s.cx - 0.7, s.h - 0.06, s.z]),
-    spine.map((s) => [s.cx + 0.7, s.h - 0.06, s.z]),
-    () => [0, -1, 0],
-    (i, s) => [run[i] / 6, s],
-    () => 1
-  )
+  // ---- the cove: a luminous spine down the entire building ----------------
+  const coveStrip = (halfWidth, drop) =>
+    strip(
+      spine.map((s) => [s.cx - halfWidth, s.h - drop, s.z]),
+      spine.map((s) => [s.cx + halfWidth, s.h - drop, s.z]),
+      () => [0, -1, 0],
+      (i, side) => [run[i] / 6, side],
+      () => 1
+    )
+
+  const cove = coveStrip(0.7, 0.055)
+  const coveGlow = coveStrip(1.55, 0.075)
+  const coveHalo = coveStrip(2.75, 0.095)
+
+  // A continuous wash down the upper half of both walls. This is geometry,
+  // not a post-processing bloom, so it stays visible and inexpensive while
+  // the visitor moves through every room.
+  const wallGlow = (side) =>
+    strip(
+      spine.map((s, i) => [
+        (side < 0 ? leftX[i] : rightX[i]) - side * 0.018,
+        s.h - 0.16,
+        s.z,
+      ]),
+      spine.map((s, i) => [
+        (side < 0 ? leftX[i] : rightX[i]) - side * 0.018,
+        Math.max(0.8, s.h - 4.5),
+        s.z,
+      ]),
+      () => (side < 0 ? [1, 0, 0] : [-1, 0, 0]),
+      (i, edge) => [run[i] / 7, edge],
+      () => 1
+    )
 
   // ---- end caps ----------------------------------------------------------
   const capGeo = (idx, dir) => {
@@ -182,6 +207,10 @@ function buildGeometry() {
     floorAO,
     ceiling,
     cove,
+    coveGlow,
+    coveHalo,
+    wallGlowLeft: wallGlow(-1),
+    wallGlowRight: wallGlow(1),
     capBack: capGeo(0, -1),
     capFar: capGeo(spine.length - 1, 1),
     spine,
@@ -192,15 +221,10 @@ export default function Hall({ palette, quality }) {
   const geo = useMemo(buildGeometry, [])
   const grain = useMemo(() => grainMap(512, 0.2, 2), [])
   const floorGrain = useMemo(() => grainMap(512, 0.12, 3), [])
-  const coveRef = useRef()
-
-  // Down a 150-metre hall every pixel of the cove converges on the vanishing
-  // point, so the strip itself is kept below full white.
-  const coveColor = useMemo(
-    () => new THREE.Color(palette.cove).multiplyScalar(palette.dark ? 0.85 : 0.5),
-    [palette.cove, palette.dark]
-  )
-
+  const wallWash = useMemo(() => coveGradient(256), [])
+  // The core is intentionally untone-mapped: mid/low quality no longer use a
+  // full-screen bloom pass, so the architecture itself carries the glow.
+  const coveColor = useMemo(() => new THREE.Color(palette.cove), [palette.cove])
 
   const wallColor = palette.wall
   const floorColor = palette.floor
@@ -290,10 +314,51 @@ export default function Hall({ palette, quality }) {
         />
       </mesh>
 
-      {/* the light slot — this is what bloom picks up */}
-      <mesh geometry={geo.cove} ref={coveRef}>
-        <meshBasicMaterial color={coveColor} side={THREE.DoubleSide} />
+      {/* A three-layer cove: crisp core, warm spill, broad halo. This remains
+          visibly luminous without post-processing and runs as simple geometry. */}
+      <mesh geometry={geo.coveHalo} renderOrder={2} raycast={() => null}>
+        <meshBasicMaterial
+          color={coveColor}
+          transparent
+          opacity={0.085}
+          blending={THREE.AdditiveBlending}
+          depthWrite={false}
+          side={THREE.DoubleSide}
+          toneMapped={false}
+        />
       </mesh>
+      <mesh geometry={geo.coveGlow} renderOrder={3} raycast={() => null}>
+        <meshBasicMaterial
+          color={coveColor}
+          transparent
+          opacity={0.2}
+          blending={THREE.AdditiveBlending}
+          depthWrite={false}
+          side={THREE.DoubleSide}
+          toneMapped={false}
+        />
+      </mesh>
+      <mesh geometry={geo.cove} renderOrder={4} raycast={() => null}>
+        <meshBasicMaterial color={coveColor} side={THREE.DoubleSide} toneMapped={false} />
+      </mesh>
+
+      {[geo.wallGlowLeft, geo.wallGlowRight].map((geometry, i) => (
+        <mesh key={`hall-wall-glow-${i}`} geometry={geometry} renderOrder={2} raycast={() => null}>
+          <meshBasicMaterial
+            alphaMap={wallWash}
+            color={coveColor}
+            transparent
+            opacity={0.24}
+            blending={THREE.AdditiveBlending}
+            depthWrite={false}
+            side={THREE.DoubleSide}
+            toneMapped={false}
+            polygonOffset
+            polygonOffsetFactor={-3}
+            polygonOffsetUnits={-3}
+          />
+        </mesh>
+      ))}
 
       {/* end caps so the hall reads as an interior, not a tunnel */}
       <mesh geometry={geo.capBack}>

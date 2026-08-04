@@ -3,14 +3,12 @@ import * as THREE from 'three'
 import { useFrame } from '@react-three/fiber'
 import { RoundedBox } from '@react-three/drei'
 import {
-  heroTypeTexture,
   labelTexture,
   documentTexture,
   contactTexture,
   sharedBrushedMetal,
 } from '../lib/textures'
 import { identity, about, resume, studioWork, hallAt, CHAPTER_Z, CONTACT_Z } from '../data/content'
-import { frame } from '../state/store'
 import { safeDt } from '../lib/math'
 
 const { damp } = THREE.MathUtils
@@ -24,46 +22,45 @@ function wallSpot(z, side, inset = 0.04) {
   }
 }
 
-/* --------------------------------------------------------- hero type */
+/* ------------------------------------------------------- wall lettering */
 
-function HeroType({ palette }) {
-  const ref = useRef()
+function WallLabel({ text, sub, z, side, y, width = 4.05, palette }) {
   const tex = useMemo(
-    () =>
-      heroTypeTexture({
-        first: identity.first,
-        last: identity.last,
-        accent: palette.signAccent,
-        ink: palette.signInk,
-      }),
-    [palette.signAccent, palette.signInk]
+    () => labelTexture(text, { sub, ink: palette.signInk, accent: palette.signAccent }),
+    [text, sub, palette.signInk, palette.signAccent]
   )
-
-  useFrame((state, delta) => {
-    const dt = safeDt(delta)
-    if (!ref.current) return
-    // Narrow windows get smaller, centred type — at seven metres wide it would
-    // otherwise run off both sides of a phone. No pointer parallax: the room
-    // holds still now, and the title with it.
-    const portrait = state.size.width < state.size.height
-    ref.current.scale.setScalar(damp(ref.current.scale.x, portrait ? 0.62 : 1, 4, dt))
-    ref.current.position.x = damp(ref.current.position.x, portrait ? 0 : -2.1, 3, dt)
-  })
+  const spot = useMemo(() => wallSpot(z, side, 0.045), [z, side])
+  // Keep room names inside the visitor's natural field of view. The previous
+  // near-ceiling placement made long labels look clipped at normal zoom.
+  const labelY = y ?? Math.min(hallAt(z).h - 1.35, 4.15)
+  const inwardX = spot.position[0] - side * 0.012
 
   return (
-    // Set left of the walkway and lifted, so the corridor keeps its vanishing
-    // point and you can see straight down the hall past the title.
-    <group ref={ref} position={[-2.1, 4.15, 3]}>
-      <mesh raycast={() => null}>
-        <planeGeometry args={[7.2, 2.67]} />
+    <group position={[inwardX, labelY, spot.position[2]]} rotation={spot.rotation}>
+      {/* A second, additive copy gives the lettering a soft halo even on the
+          performance tier where full-screen bloom is intentionally disabled. */}
+      <mesh position={[0, 0, 0.003]} scale={1.055} raycast={() => null} renderOrder={2}>
+        <planeGeometry args={[width, width / 4]} />
+        <meshBasicMaterial
+          map={tex}
+          color={palette.cove}
+          transparent
+          opacity={0.2}
+          blending={THREE.AdditiveBlending}
+          depthWrite={false}
+          toneMapped={false}
+        />
+      </mesh>
+      <mesh position={[0, 0, 0.008]} raycast={() => null} renderOrder={3}>
+        <planeGeometry args={[width, width / 4]} />
         <meshStandardMaterial
           map={tex}
-          transparent
-          roughness={0.55}
-          metalness={0.05}
           emissiveMap={tex}
           emissive="#ffffff"
-          emissiveIntensity={palette.dark ? 0.5 : 0.12}
+          emissiveIntensity={0.72}
+          transparent
+          roughness={0.76}
+          metalness={0}
           depthWrite={false}
         />
       </mesh>
@@ -71,21 +68,14 @@ function HeroType({ palette }) {
   )
 }
 
-/* ------------------------------------------------------- wall lettering */
-
-function WallLabel({ text, sub, z, side, y = 3.5, width = 4.6, palette }) {
-  const tex = useMemo(
-    () => labelTexture(text, { sub, ink: palette.signInk, accent: palette.signAccent }),
-    [text, sub, palette.signInk, palette.signAccent]
-  )
-  const spot = useMemo(() => wallSpot(z, side, 0.05), [z, side])
-  return (
-    <mesh position={[spot.position[0], y, spot.position[2]]} rotation={spot.rotation} raycast={() => null}>
-      <planeGeometry args={[width, width / 4]} />
-      <meshStandardMaterial map={tex} transparent roughness={0.8} metalness={0} depthWrite={false} />
-    </mesh>
-  )
-}
+const ROOM_LABELS = [
+  { text: 'Main Gallery', sub: 'Selected work', z: -4 },
+  { text: 'Studio Tour', sub: 'About', z: -61 },
+  { text: 'The Alcove', sub: 'Expertise', z: -82 },
+  { text: 'Records', sub: 'Résumé', z: -98 },
+  { text: 'The Quiet Room', sub: 'Contact', z: -108 },
+  { text: 'Studio Work', sub: 'Side gallery', z: -130 },
+]
 
 /* ------------------------------------------------------------- résumé */
 
@@ -198,14 +188,13 @@ function ContactPlate({ palette }) {
 export default function Signage({ palette, onDownload }) {
   return (
     <group>
-      <HeroType palette={palette} />
-
-      <WallLabel text="Main Gallery" sub="Selected work" z={-4} side={-1} palette={palette} />
-      <WallLabel text="Studio Tour" sub="About" z={-58} side={1} palette={palette} />
-      <WallLabel text="The Alcove" sub="Expertise" z={-77} side={-1} y={4.2} width={5.2} palette={palette} />
-      <WallLabel text="Records" sub="Résumé" z={-95} side={1} palette={palette} />
-      <WallLabel text="The Quiet Room" sub="Contact" z={-103} side={-1} palette={palette} />
-      <WallLabel text="Studio Work" sub="Side gallery" z={-124} side={1} palette={palette} />
+      {/* Every room names itself on both walls, high enough to stay clear of
+          the work. The opening no longer repeats the giant name on a wall. */}
+      {ROOM_LABELS.flatMap((label) =>
+        [-1, 1].map((side) => (
+          <WallLabel key={`${label.text}-${side}`} {...label} side={side} palette={palette} />
+        ))
+      )}
       <EndWall palette={palette} />
 
       {/* chapter markers along the studio tour */}
@@ -233,10 +222,32 @@ function EndWall({ palette }) {
   )
   const { cx } = hallAt(-147)
   return (
-    <mesh position={[cx, 2.7, -147.4]} raycast={() => null}>
-      <planeGeometry args={[5, 1.25]} />
-      <meshStandardMaterial map={tex} transparent roughness={0.85} depthWrite={false} />
-    </mesh>
+    <group position={[cx, 4.05, -147.38]}>
+      <mesh position={[0, 0, 0.004]} scale={1.05} raycast={() => null} renderOrder={2}>
+        <planeGeometry args={[4.9, 1.225]} />
+        <meshBasicMaterial
+          map={tex}
+          color={palette.cove}
+          transparent
+          opacity={0.22}
+          blending={THREE.AdditiveBlending}
+          depthWrite={false}
+          toneMapped={false}
+        />
+      </mesh>
+      <mesh position={[0, 0, 0.01]} raycast={() => null} renderOrder={3}>
+        <planeGeometry args={[4.9, 1.225]} />
+        <meshStandardMaterial
+          map={tex}
+          emissiveMap={tex}
+          emissive="#ffffff"
+          emissiveIntensity={0.76}
+          transparent
+          roughness={0.82}
+          depthWrite={false}
+        />
+      </mesh>
+    </group>
   )
 }
 

@@ -41,36 +41,10 @@ export const SCROLL_SCREENS = 11
 const params = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '')
 
 /**
- * Integrated graphics. A laptop can report eight cores and 16GB and still be
- * drawing through an Intel iGPU sharing system memory — and this scene is
- * entirely fill-rate bound, so cores and RAM say nothing useful about it. Ask
- * the driver instead.
- */
-const INTEGRATED =
-  /(intel|hd graphics|uhd|iris|mesa|llvmpipe|swiftshader|microsoft basic|radeon\(tm\) graphics|vega \d|adreno|mali|powervr)/i
-
-let gpuTier = null
-function detectGpu() {
-  if (gpuTier) return gpuTier
-  try {
-    const canvas = document.createElement('canvas')
-    const gl = canvas.getContext('webgl2') || canvas.getContext('webgl')
-    if (!gl) return (gpuTier = 'none')
-    const dbg = gl.getExtension('WEBGL_debug_renderer_info')
-    const name = dbg ? String(gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL)) : ''
-    gl.getExtension('WEBGL_lose_context')?.loseContext()
-    gpuTier = INTEGRATED.test(name) ? 'integrated' : 'discrete'
-  } catch {
-    gpuTier = 'unknown'
-  }
-  return gpuTier
-}
-
-/**
  * Three tiers. `high` adds the reflective floor, which costs a whole extra
- * render of the scene every frame — it is reserved for hardware that can
- * clearly afford it. Re-run after mount: at module-evaluation time the viewport
- * may not have been laid out yet.
+ * render of the scene every frame. It is opt-in through `?quality=high`; the
+ * normal desktop path deliberately favors reliability. Re-run after mount:
+ * at module-evaluation time the viewport may not have been laid out yet.
  */
 export function detectQuality() {
   const forced = params.get('quality')
@@ -81,11 +55,14 @@ export function detectQuality() {
   const cores = navigator.hardwareConcurrency || 4
   const mem = navigator.deviceMemory || 4
 
-  if (width < 820) return 'low'
-  if (cores <= 4 || mem <= 4 || width < 1100) return 'mid'
-  // Integrated graphics tops out at mid, however healthy the CPU looks.
-  if (detectGpu() !== 'discrete') return 'mid'
-  return 'high'
+  if (width < 820 || cores <= 2 || mem <= 2) return 'low'
+
+  // Stability is the default. Even discrete GPUs can be routed through an
+  // integrated compositor in Chrome, and the reflective floor + bloom path is
+  // where the remaining long-frame stalls lived. High quality is still
+  // available deliberately with ?quality=high, but normal visitors get the
+  // architectural-glow mid tier on every desktop.
+  return 'mid'
 }
 
 export const useStore = create((set, get) => ({

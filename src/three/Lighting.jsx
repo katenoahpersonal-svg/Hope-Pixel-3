@@ -138,7 +138,7 @@ export default function Lighting({ palette, quality }) {
       const falloff = THREE.MathUtils.clamp(1 - (d - 4) / 12, 0.12, 1)
       // Restrained now that ambient carries more of the room: a cream panel
       // face under a hard spot loses its own title to glare.
-      light.current.intensity = 6.5 * falloff
+      light.current.intensity = 8.5 * falloff
     }
 
     assign(spotA, targetA, bestP, bestD)
@@ -148,9 +148,9 @@ export default function Lighting({ palette, quality }) {
     <>
       {/* reflections + soft fill, baked once per daylight phase */}
       <Environment
-        resolution={256}
+        resolution={128}
         frames={1}
-        environmentIntensity={palette.env * 1.08}
+        environmentIntensity={palette.env * 1.28}
         // Re-bakes only when the nearest phase actually changes. Keying on the
         // blend amount re-rendered the cube map several times per transition,
         // and each bake is six scene renders.
@@ -158,7 +158,7 @@ export default function Lighting({ palette, quality }) {
       >
         <color attach="background" args={[palette.dark ? '#0d0e12' : '#8c877d']} />
         {/* the ceiling cove, the dominant source */}
-        <Lightformer form="rect" intensity={palette.coveIntensity * 1.6} color={palette.cove} scale={[14, 2, 1]} position={[0, 6, 0]} rotation={[Math.PI / 2, 0, 0]} />
+        <Lightformer form="rect" intensity={palette.coveIntensity * 2.15} color={palette.cove} scale={[14, 2, 1]} position={[0, 6, 0]} rotation={[Math.PI / 2, 0, 0]} />
         {/* daylight side */}
         <Lightformer form="rect" intensity={palette.sunIntensity * 0.7} color={palette.sun} scale={[6, 8, 1]} position={[-9, 3, 2]} rotation={[0, Math.PI / 2, 0]} />
         {/* bounce off the opposite wall */}
@@ -166,7 +166,7 @@ export default function Lighting({ palette, quality }) {
         <Lightformer form="rect" intensity={0.4} color={palette.floor} scale={[14, 14, 1]} position={[0, -3, 0]} rotation={[-Math.PI / 2, 0, 0]} />
       </Environment>
 
-      <hemisphereLight args={[palette.sky, palette.ground, palette.ambient * 1.2]} />
+      <hemisphereLight args={[palette.sky, palette.ground, palette.ambient * 1.55]} />
 
       {COVE_OFFSETS.map((off, i) => (
         <pointLight
@@ -175,11 +175,13 @@ export default function Lighting({ palette, quality }) {
           color={palette.cove}
           // Two lamps doing the work of three, so each carries more and reaches
           // further before it falls off.
-          intensity={palette.coveIntensity * (i === 0 ? 50 : 42)}
-          distance={44}
-          decay={1.15}
+          intensity={palette.coveIntensity * (i === 0 ? 86 : 74)}
+          distance={40}
+          decay={1.2}
         />
       ))}
+
+
 
       <directionalLight
         ref={sun}

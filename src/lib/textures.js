@@ -76,7 +76,7 @@ function wrapFit(ctx, text, maxWidth, size, maxLines, font = DISPLAY) {
   return { lines: [text], size: s }
 }
 
-function finish(c, { srgb = true, repeat = null, aniso = 8 } = {}) {
+function finish(c, { srgb = true, repeat = null, aniso = 4 } = {}) {
   const tex = new CanvasTexture(c)
   if (srgb) tex.colorSpace = SRGBColorSpace
   if (repeat) {
@@ -236,20 +236,46 @@ export function shaftGradient(w = 256, h = 512) {
 
 /** Vinyl lettering applied to a wall — transparent, dark, tracked out. */
 export function labelTexture(text, { sub = '', width = 1024, height = 256, ink = '#3a352e', accent = '#b9793f', align = 'left' } = {}) {
-  const c = canvas(width, height)
-  const ctx = c.getContext('2d')
-  ctx.clearRect(0, 0, width, height)
-  const x = align === 'center' ? width / 2 : 12
-  ctx.fillStyle = ink
-  ctx.font = `500 76px ${TEXT}`
-  ctx.textBaseline = 'alphabetic'
-  tracked(ctx, text.toUpperCase(), x, sub ? 96 : 140, 10, align)
-  if (sub) {
-    ctx.fillStyle = accent
-    ctx.font = `400 40px ${TEXT}`
-    tracked(ctx, sub.toUpperCase(), x, 168, 6, align)
-  }
-  return finish(c)
+  // Left/right copies of a room title share one GPU texture. Without this,
+  // "title every wall" doubled the label memory and upload work for no visual
+  // benefit — exactly the kind of burst that can make an integrated GPU hitch.
+  const key = ['label', text, sub, width, height, ink, accent, align].join('|')
+  return once(key, () => {
+    const c = canvas(width, height)
+    const ctx = c.getContext('2d')
+    ctx.clearRect(0, 0, width, height)
+    const margin = 34
+    const x = align === 'center' ? width / 2 : margin
+    const maxWidth = width - margin * 2
+    const fitTracked = (value, startSize, startSpacing, weight) => {
+      let size = startSize
+      let spacing = startSpacing
+      const chars = [...value]
+      while (size > 30) {
+        ctx.font = `${weight} ${size}px ${TEXT}`
+        const measured = chars.reduce((sum, char) => sum + ctx.measureText(char).width + spacing, -spacing)
+        if (measured <= maxWidth) break
+        size -= 2
+        spacing = Math.max(2, spacing - 0.25)
+      }
+      ctx.font = `${weight} ${size}px ${TEXT}`
+      return spacing
+    }
+
+    ctx.textBaseline = 'alphabetic'
+    const heading = text.toUpperCase()
+    ctx.fillStyle = ink
+    const headingSpacing = fitTracked(heading, 76, 10, 500)
+    tracked(ctx, heading, x, sub ? 96 : 140, headingSpacing, align)
+
+    if (sub) {
+      const subtitle = sub.toUpperCase()
+      ctx.fillStyle = accent
+      const subSpacing = fitTracked(subtitle, 40, 6, 400)
+      tracked(ctx, subtitle, x, 168, subSpacing, align)
+    }
+    return finish(c)
+  })
 }
 
 /* ------------------------------------------------------------ hero type */
